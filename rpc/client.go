@@ -142,8 +142,6 @@ func (c *Client) call(fn reflect.Value, name string, in []reflect.Value) []refle
 }
 
 func (c *Client) returnCallError(fn reflect.Value, err error) []reflect.Value {
-	println("return call error", err.Error())
-
 	nOut := fn.Type().NumOut()
 	out := make([]reflect.Value, nOut)
 	for i := 0; i < nOut-1; i++ {

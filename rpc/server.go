@@ -96,7 +96,6 @@ func (s *Server) Register(name string, f interface{}) (err error) {
 }
 
 func (s *Server) onConn(co net.Conn) {
-	println("onconn")
 	c := new(conn)
 	c.co = co
 
