@@ -10,17 +10,19 @@ import (
 type Server struct {
 	sync.Mutex
 
-	addr  string
-	funcs map[string]reflect.Value
+	network string
+	addr    string
+	funcs   map[string]reflect.Value
 
 	listener net.Listener
 	running  bool
 }
 
-func NewServer(addr string) *Server {
+func NewServer(network, addr string) *Server {
 	RegisterType(RpcError{})
 
 	s := new(Server)
+	s.network = network
 	s.addr = addr
 
 	s.funcs = make(map[string]reflect.Value)
@@ -30,7 +32,7 @@ func NewServer(addr string) *Server {
 
 func (s *Server) Start() error {
 	var err error
-	s.listener, err = net.Listen("tcp", s.addr)
+	s.listener, err = net.Listen(s.network, s.addr)
 	if err != nil {
 		return err
 	}

@@ -11,8 +11,8 @@ type conn struct {
 	co net.Conn
 }
 
-func newConn(addr string) (*conn, error) {
-	c, err := net.Dial("tcp", addr)
+func newConn(network, addr string) (*conn, error) {
+	c, err := net.Dial(network, addr)
 	if err != nil {
 		return nil, err
 	}

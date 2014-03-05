@@ -14,7 +14,7 @@ var testClient *Client
 
 func newTestServer() *Server {
 	f := func() {
-		testServer = NewServer("127.0.0.1:11182")
+		testServer = NewServer("tcp", "127.0.0.1:11182")
 		go testServer.Start()
 	}
 
@@ -25,7 +25,7 @@ func newTestServer() *Server {
 
 func newTestClient() *Client {
 	f := func() {
-		testClient = NewClient("127.0.0.1:11182", 10)
+		testClient = NewClient("tcp", "127.0.0.1:11182", 10)
 	}
 
 	testClientOnce.Do(f)

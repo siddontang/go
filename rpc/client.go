@@ -10,17 +10,19 @@ import (
 type Client struct {
 	sync.Mutex
 
-	addr string
+	network string
+	addr    string
 
 	maxIdleConns int
 
 	conns *list.List
 }
 
-func NewClient(addr string, maxIdleConns int) *Client {
+func NewClient(network, addr string, maxIdleConns int) *Client {
 	RegisterType(RpcError{})
 
 	c := new(Client)
+	c.network = network
 	c.addr = addr
 
 	c.maxIdleConns = maxIdleConns
@@ -162,7 +164,7 @@ func (c *Client) popConn() (*conn, error) {
 		return v.Value.(*conn), nil
 	}
 	c.Unlock()
-	return newConn(c.addr)
+	return newConn(c.network, c.addr)
 }
 
 func (c *Client) pushConn(co *conn) error {
