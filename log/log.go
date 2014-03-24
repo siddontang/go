@@ -17,14 +17,14 @@ const (
 
 var LevelName [6]string = [6]string{"Trace", "Debug", "Info", "Warn", "Error", "Fatal"}
 
-type QLogger struct {
+type Logger struct {
 	logger  *log.Logger
 	level   int
 	handler Handler
 }
 
-func New(handler Handler, flag int) *QLogger {
-	var l = new(QLogger)
+func New(handler Handler, flag int) *Logger {
+	var l = new(Logger)
 	l.logger = log.New(handler, "", flag) //log.LstdFlags|log.Lshortfile)
 	l.level = LevelInfo
 	l.handler = handler
@@ -32,7 +32,7 @@ func New(handler Handler, flag int) *QLogger {
 	return l
 }
 
-func NewDefault(handler Handler) *QLogger {
+func NewDefault(handler Handler) *Logger {
 	return New(handler, log.LstdFlags|log.Lshortfile)
 }
 
@@ -43,15 +43,15 @@ func newStdHandler() *StreamHandler {
 
 var std = NewDefault(newStdHandler())
 
-func (l *QLogger) Close() {
+func (l *Logger) Close() {
 	l.handler.Close()
 }
 
-func (l *QLogger) SetLevel(level int) {
+func (l *Logger) SetLevel(level int) {
 	l.level = level
 }
 
-func (l *QLogger) Output(callDepth int, level int, format string, v ...interface{}) {
+func (l *Logger) Output(callDepth int, level int, format string, v ...interface{}) {
 	if l.level <= level {
 		f := fmt.Sprintf("[%s] %s", LevelName[level], format)
 		s := fmt.Sprintf(f, v...)
@@ -59,31 +59,31 @@ func (l *QLogger) Output(callDepth int, level int, format string, v ...interface
 	}
 }
 
-func (l *QLogger) Write(s string) {
+func (l *Logger) Write(s string) {
 	l.logger.Output(3, s)
 }
 
-func (l *QLogger) Trace(format string, v ...interface{}) {
+func (l *Logger) Trace(format string, v ...interface{}) {
 	l.Output(3, LevelTrace, format, v...)
 }
 
-func (l *QLogger) Debug(format string, v ...interface{}) {
+func (l *Logger) Debug(format string, v ...interface{}) {
 	l.Output(3, LevelDebug, format, v...)
 }
 
-func (l *QLogger) Info(format string, v ...interface{}) {
+func (l *Logger) Info(format string, v ...interface{}) {
 	l.Output(3, LevelInfo, format, v...)
 }
 
-func (l *QLogger) Warn(format string, v ...interface{}) {
+func (l *Logger) Warn(format string, v ...interface{}) {
 	l.Output(3, LevelWarn, format, v...)
 }
 
-func (l *QLogger) Error(format string, v ...interface{}) {
+func (l *Logger) Error(format string, v ...interface{}) {
 	l.Output(3, LevelError, format, v...)
 }
 
-func (l *QLogger) Fatal(format string, v ...interface{}) {
+func (l *Logger) Fatal(format string, v ...interface{}) {
 	l.Output(3, LevelFatal, format, v...)
 }
 
