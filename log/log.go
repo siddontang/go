@@ -23,6 +23,15 @@ type Logger struct {
 	handler Handler
 }
 
+const (
+	Ldate         = log.Ldate
+	Ltime         = log.Ltime
+	Lmicroseconds = log.Lmicroseconds
+	Llongfile     = log.Llongfile
+	Lshortfile    = log.Lshortfile
+	LstdFlags     = Ldate | Ltime
+)
+
 func New(handler Handler, flag int) *Logger {
 	var l = new(Logger)
 	l.logger = log.New(handler, "", flag) //log.LstdFlags|log.Lshortfile)
