@@ -14,7 +14,6 @@ type bucket struct {
 }
 
 const defaultTasksSize = 16
-const defaultTaskPool = 4
 
 type TimingWheel struct {
 	sync.Mutex
@@ -29,8 +28,6 @@ type TimingWheel struct {
 	buckets []bucket
 
 	pos int
-
-	tasks chan []TaskFunc
 }
 
 func NewTimingWheel(interval time.Duration, buckets int) *TimingWheel {
@@ -52,12 +49,6 @@ func NewTimingWheel(interval time.Duration, buckets int) *TimingWheel {
 
 	w.ticker = time.NewTicker(interval)
 	go w.run()
-
-	w.tasks = make(chan []TaskFunc, 1024)
-
-	for i := 0; i < defaultTaskPool; i++ {
-		go w.taskPool()
-	}
 
 	return w
 }
@@ -123,24 +114,18 @@ func (w *TimingWheel) onTicker() {
 
 	close(lastC)
 
-	w.tasks <- tasks
-}
-
-func (w *TimingWheel) taskPool() {
-	defer func() {
-		if e := recover(); e != nil {
-			log.Fatal("task pool fatal %v", e)
-		}
-	}()
-
-	for {
-		select {
-		case tasks := <-w.tasks:
+	if len(tasks) > 0 {
+		f := func(tasks []TaskFunc) {
+			defer func() {
+				if e := recover(); e != nil {
+					log.Fatal("run task fatal %v", e)
+				}
+			}()
 			for _, task := range tasks {
 				task()
 			}
-		case <-w.quit:
-			return
 		}
+
+		go f(tasks)
 	}
 }
