@@ -6,7 +6,7 @@ import (
 )
 
 func TestStdStreamLog(t *testing.T) {
-	h, _ := NewDefaultStreamHandler(os.Stdout)
+	h, _ := NewStreamHandler(os.Stdout)
 	s := NewDefault(h)
 	s.Info("hello world")
 

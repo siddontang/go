@@ -2,8 +2,9 @@ package log
 
 import (
 	"fmt"
-	"log"
 	"os"
+	"runtime"
+	"time"
 )
 
 const (
@@ -15,45 +16,72 @@ const (
 	LevelFatal
 )
 
+const (
+	Ltime  = iota << 1 //time format "2006/01/02 15:04:05"
+	Lfile              //file.go:123
+	Llevel             //[Trace|Debug|Info...]
+)
+
 var LevelName [6]string = [6]string{"Trace", "Debug", "Info", "Warn", "Error", "Fatal"}
 
-type Logger struct {
-	logger  *log.Logger
-	level   int
-	handler Handler
-}
+const TimeFormat = "2006/01/02 15:04:05"
 
-const (
-	Ldate         = log.Ldate
-	Ltime         = log.Ltime
-	Lmicroseconds = log.Lmicroseconds
-	Llongfile     = log.Llongfile
-	Lshortfile    = log.Lshortfile
-	LstdFlags     = Ldate | Ltime
-)
+type Logger struct {
+	level int
+	flag  int
+
+	handler Handler
+
+	quit chan struct{}
+	msg  chan []byte
+}
 
 func New(handler Handler, flag int) *Logger {
 	var l = new(Logger)
-	l.logger = log.New(handler, "", flag) //log.LstdFlags|log.Lshortfile)
+
 	l.level = LevelInfo
 	l.handler = handler
+
+	l.flag = flag
+
+	l.quit = make(chan struct{})
+
+	l.msg = make(chan []byte, 1024)
+
+	go l.run()
 
 	return l
 }
 
 func NewDefault(handler Handler) *Logger {
-	return New(handler, log.LstdFlags|log.Lshortfile)
+	return New(handler, Ltime|Lfile|Llevel)
 }
 
 func newStdHandler() *StreamHandler {
-	h, _ := NewDefaultStreamHandler(os.Stdout)
+	h, _ := NewStreamHandler(os.Stdout)
 	return h
 }
 
 var std = NewDefault(newStdHandler())
 
+func (l *Logger) run() {
+	for {
+		select {
+		case msg := <-l.msg:
+			l.handler.Write(msg)
+		case <-l.quit:
+			l.handler.Close()
+		}
+	}
+}
+
 func (l *Logger) Close() {
-	l.handler.Close()
+	if l.quit == nil {
+		return
+	}
+
+	close(l.quit)
+	l.quit = nil
 }
 
 func (l *Logger) SetLevel(level int) {
@@ -61,39 +89,69 @@ func (l *Logger) SetLevel(level int) {
 }
 
 func (l *Logger) Output(callDepth int, level int, format string, v ...interface{}) {
-	if l.level <= level {
-		f := fmt.Sprintf("[%s] %s", LevelName[level], format)
-		s := fmt.Sprintf(f, v...)
-		l.logger.Output(callDepth, s)
+	if l.level > level {
+		return
 	}
-}
 
-func (l *Logger) Write(s string) {
-	l.logger.Output(3, s)
+	buf := make([]byte, 0, 1024)
+
+	if l.flag&Ltime > 0 {
+		now := time.Now().Format(TimeFormat)
+		buf = append(buf, now...)
+		buf = append(buf, " "...)
+	}
+
+	if l.flag&Lfile > 0 {
+		_, file, line, ok := runtime.Caller(callDepth)
+		if !ok {
+			file = "???"
+			line = 0
+		} else {
+			for i := len(file) - 1; i > 0; i-- {
+				if file[i] == '/' {
+					file = file[i+1:]
+					break
+				}
+			}
+		}
+
+		buf = append(buf, fmt.Sprintf("%s:%d ", file, line)...)
+	}
+
+	if l.flag&Llevel > 0 {
+		buf = append(buf, fmt.Sprintf("[%s] ", LevelName[level])...)
+	}
+
+	s := fmt.Sprintf(format, v...)
+
+	buf = append(buf, s...)
+	buf = append(buf, "\n"...)
+
+	l.msg <- buf
 }
 
 func (l *Logger) Trace(format string, v ...interface{}) {
-	l.Output(3, LevelTrace, format, v...)
+	l.Output(2, LevelTrace, format, v...)
 }
 
 func (l *Logger) Debug(format string, v ...interface{}) {
-	l.Output(3, LevelDebug, format, v...)
+	l.Output(2, LevelDebug, format, v...)
 }
 
 func (l *Logger) Info(format string, v ...interface{}) {
-	l.Output(3, LevelInfo, format, v...)
+	l.Output(2, LevelInfo, format, v...)
 }
 
 func (l *Logger) Warn(format string, v ...interface{}) {
-	l.Output(3, LevelWarn, format, v...)
+	l.Output(2, LevelWarn, format, v...)
 }
 
 func (l *Logger) Error(format string, v ...interface{}) {
-	l.Output(3, LevelError, format, v...)
+	l.Output(2, LevelError, format, v...)
 }
 
 func (l *Logger) Fatal(format string, v ...interface{}) {
-	l.Output(3, LevelFatal, format, v...)
+	l.Output(2, LevelFatal, format, v...)
 }
 
 func SetLevel(level int) {
@@ -101,25 +159,25 @@ func SetLevel(level int) {
 }
 
 func Trace(format string, v ...interface{}) {
-	std.Output(3, LevelTrace, format, v...)
+	std.Output(2, LevelTrace, format, v...)
 }
 
 func Debug(format string, v ...interface{}) {
-	std.Output(3, LevelDebug, format, v...)
+	std.Output(2, LevelDebug, format, v...)
 }
 
 func Info(format string, v ...interface{}) {
-	std.Output(3, LevelInfo, format, v...)
+	std.Output(2, LevelInfo, format, v...)
 }
 
 func Warn(format string, v ...interface{}) {
-	std.Output(3, LevelWarn, format, v...)
+	std.Output(2, LevelWarn, format, v...)
 }
 
 func Error(format string, v ...interface{}) {
-	std.Output(3, LevelError, format, v...)
+	std.Output(2, LevelError, format, v...)
 }
 
 func Fatal(format string, v ...interface{}) {
-	std.Output(3, LevelFatal, format, v...)
+	std.Output(2, LevelFatal, format, v...)
 }
