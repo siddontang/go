@@ -6,29 +6,12 @@ import (
 )
 
 func TestTimingWheel(t *testing.T) {
-	w := NewTimingWheel(1*time.Second, 10)
+	w := NewTimingWheel(100*time.Millisecond, 10)
 
-	println(time.Now().Unix())
 	for {
 		select {
-		case <-w.After(1 * time.Second):
-			println(time.Now().Unix())
+		case <-w.After(200 * time.Millisecond):
 			return
 		}
 	}
-}
-
-func TestTask(t *testing.T) {
-	w := NewTimingWheel(1*time.Second, 10)
-
-	r := make(chan struct{})
-	f := func() {
-		println("hello world")
-		r <- struct{}{}
-	}
-
-	w.AddTask(1*time.Second, f)
-
-	<-r
-	println("over")
 }
