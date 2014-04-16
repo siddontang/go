@@ -31,6 +31,7 @@ func (e *Element) Prev() *Element {
 	return e.list.elems[e.prev]
 }
 
+//static linked list based array
 type List struct {
 	elems []*Element
 
