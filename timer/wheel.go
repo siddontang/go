@@ -77,22 +77,23 @@ func NewWheel(tick time.Duration) *Wheel {
 }
 
 func (w *Wheel) addTimerInternal(t *timer) {
+	expires := t.expires
 	idx := t.expires - w.jiffies
 
 	var tv [][]*timer
 	var i uint64
 
 	if idx < tvr_size {
-		i = t.expires & tvr_mask
+		i = expires & tvr_mask
 		tv = w.tv1
 	} else if idx < (1 << (tvr_bits + tvn_bits)) {
-		i = (t.expires >> tvr_bits) & tvn_mask
+		i = (expires >> tvr_bits) & tvn_mask
 		tv = w.tv2
 	} else if idx < (1 << (tvr_bits + 2*tvn_bits)) {
-		i = (t.expires >> (tvr_bits + tvn_bits)) & tvn_mask
+		i = (expires >> (tvr_bits + tvn_bits)) & tvn_mask
 		tv = w.tv3
 	} else if idx < (1 << (tvr_bits + 3*tvn_bits)) {
-		i = (t.expires >> (tvr_bits + 2*tvn_bits)) & tvn_mask
+		i = (expires >> (tvr_bits + 2*tvn_bits)) & tvn_mask
 		tv = w.tv4
 	} else if int64(idx) < 0 {
 		i = w.jiffies & tvr_mask
@@ -101,10 +102,10 @@ func (w *Wheel) addTimerInternal(t *timer) {
 		if idx > 0x00000000ffffffff {
 			idx = 0x00000000ffffffff
 
-			t.expires = idx + w.jiffies
+			expires = idx + w.jiffies
 		}
 
-		i = (t.expires >> (tvr_bits + 3*tvn_bits)) & tvn_mask
+		i = (expires >> (tvr_bits + 3*tvn_bits)) & tvn_mask
 		tv = w.tv5
 	}
 

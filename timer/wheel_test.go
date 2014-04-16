@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-var testWheel = NewWheel(100 * time.Millisecond)
+var testWheel = NewWheel(1 * time.Millisecond)
 
 func TestTimer(t *testing.T) {
 	t1 := testWheel.NewTimer(500 * time.Millisecond)
@@ -39,5 +39,4 @@ func TestTicker(t *testing.T) {
 	after := time.Now()
 
 	println(after.Sub(before).String())
-
 }
