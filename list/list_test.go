@@ -1,4 +1,4 @@
-package arraylist
+package list
 
 import (
 	"reflect"
@@ -258,6 +258,8 @@ func TestIssue6349(t *testing.T) {
 	l.PushBack(2)
 
 	e := l.Front()
+
+	//because element may be reused later, we must clear value in Remove
 	v := l.Remove(e)
 
 	if v != 1 {

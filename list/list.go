@@ -1,4 +1,4 @@
-package arraylist
+package list
 
 const defaultSize = 1024
 
