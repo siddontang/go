@@ -2,8 +2,6 @@ package arraylist
 
 const defaultSize = 1024
 
-var none interface{}
-
 type Element struct {
 	Value interface{}
 
@@ -16,7 +14,7 @@ type Element struct {
 }
 
 func (e *Element) Next() *Element {
-	if e.next == 0 || e.Value == none || e.list == nil {
+	if e.next == 0 || e.prev == -1 || e.list == nil {
 		return nil
 	}
 
@@ -24,7 +22,7 @@ func (e *Element) Next() *Element {
 }
 
 func (e *Element) Prev() *Element {
-	if e.prev == 0 || e.Value == none || e.list == nil {
+	if e.prev == 0 || e.prev == -1 || e.list == nil {
 		return nil
 	}
 
@@ -118,14 +116,14 @@ func (l *List) Remove(e *Element) interface{} {
 		return nil
 	}
 
-	if e.next == -1 || e.prev == -1 {
+	if e.prev == -1 {
 		return e.Value
 	}
 
 	l.remove(e)
 
 	v := e.Value
-	e.Value = none
+	e.Value = nil
 
 	e.next = l.free
 	l.free = e.index
