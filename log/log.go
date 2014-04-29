@@ -125,7 +125,10 @@ func (l *Logger) Output(callDepth int, level int, format string, v ...interface{
 	s := fmt.Sprintf(format, v...)
 
 	buf = append(buf, s...)
-	buf = append(buf, "\n"...)
+
+	if s[len(s)-1] != '\n' {
+		buf = append(buf, "\n"...)
+	}
 
 	l.msg <- buf
 }
