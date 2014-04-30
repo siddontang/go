@@ -12,9 +12,9 @@ var testConfigJson = []byte(`
     {
         "path" : "./testdb",
         "compression":true,
-        "block_size" : 32,
-        "write_buffer_size" : 2,
-        "cache_size" : 20
+        "block_size" : 32768,
+        "write_buffer_size" : 2097152,
+        "cache_size" : 20971520
     }
     `)
 

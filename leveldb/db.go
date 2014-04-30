@@ -33,13 +33,7 @@ type DB struct {
 	filter *levigo.FilterPolicy
 }
 
-func Open(configJson json.RawMessage) (*DB, error) {
-	cfg := new(Config)
-	err := json.Unmarshal(configJson, cfg)
-	if err != nil {
-		return nil, err
-	}
-
+func OpenWithConfig(cfg *Config) (*DB, error) {
 	db := new(DB)
 	db.cfg = cfg
 
@@ -50,8 +44,19 @@ func Open(configJson json.RawMessage) (*DB, error) {
 	db.iteratorOpts = levigo.NewReadOptions()
 	db.iteratorOpts.SetFillCache(false)
 
+	var err error
 	db.db, err = levigo.Open(cfg.Path, db.opts)
 	return db, err
+}
+
+func Open(configJson json.RawMessage) (*DB, error) {
+	cfg := new(Config)
+	err := json.Unmarshal(configJson, cfg)
+	if err != nil {
+		return nil, err
+	}
+
+	return OpenWithConfig(cfg)
 }
 
 func (db *DB) initOptions(cfg *Config) *levigo.Options {
@@ -72,14 +77,12 @@ func (db *DB) initOptions(cfg *Config) *levigo.Options {
 		opts.SetCompression(levigo.NoCompression)
 	}
 
-	blockSize := cfg.BlockSize * 1024
-	if blockSize > 0 {
-		opts.SetBlockSize(blockSize)
+	if cfg.BlockSize > 0 {
+		opts.SetBlockSize(cfg.BlockSize)
 	}
 
-	writeBufferSize := cfg.WriteBufferSize * 1024 * 1024
-	if writeBufferSize > 0 {
-		opts.SetWriteBufferSize(writeBufferSize)
+	if cfg.WriteBufferSize > 0 {
+		opts.SetWriteBufferSize(cfg.WriteBufferSize)
 	}
 
 	return opts
