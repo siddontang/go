@@ -5,6 +5,8 @@
 #install leveldb and snappy
 
 #you must set your own snappy and leveldb source directory
+#snappy https://drive.google.com/file/d/0B0xs9kK-b5nMOWIxWGJhMXd6aGs/edit?usp=sharing
+#leveldb https://leveldb.googlecode.com/files/leveldb-1.15.0.tar.gz
 SNAPPY_SRC=./snappy
 LEVELDB_SRC=./leveldb
 
@@ -30,7 +32,7 @@ if [ ! -f $LEVELDB_DIR/lib/libleveldb.a ]; then
         mkdir -p $LEVELDB_DIR/include/leveldb && \
         install include/leveldb/*.h $LEVELDB_DIR/include/leveldb && \
         mkdir -p $LEVELDB_DIR/lib && \
-        cp -af libleveldb.* $LEVELDB_DIR/lib)
+        cp -f libleveldb.* $LEVELDB_DIR/lib)
 else
     echo "skip install leveldb"
 fi
