@@ -73,6 +73,8 @@ func TestBatch(t *testing.T) {
 	db.Put(key2, value)
 
 	wb := db.NewWriteBatch()
+	defer wb.Close()
+
 	wb.Delete(key2)
 	wb.Put(key1, []byte("hello world2"))
 
@@ -92,7 +94,6 @@ func TestBatch(t *testing.T) {
 		t.Fatal(string(v))
 	}
 
-	wb = db.NewWriteBatch()
 	wb.Delete(key1)
 
 	wb.Rollback()

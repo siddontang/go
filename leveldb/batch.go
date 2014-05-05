@@ -18,17 +18,18 @@ func (wb *WriteBatch) Delete(key []byte) {
 }
 
 func (wb *WriteBatch) Commit() error {
-	err := wb.db.db.Write(wb.db.writeOpts, wb.wb)
-	wb.close()
-	return err
+	return wb.db.db.Write(wb.db.writeOpts, wb.wb)
 }
 
 func (wb *WriteBatch) Rollback() {
 	wb.wb.Clear()
-	wb.close()
 }
 
-func (wb *WriteBatch) close() {
+func (wb *WriteBatch) Close() {
+	if wb.wb == nil {
+		return
+	}
+
 	wb.wb.Close()
 	wb.wb = nil
 }
