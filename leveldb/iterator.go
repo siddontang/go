@@ -99,3 +99,23 @@ func (it *Iterator) Value() []byte {
 func (it *Iterator) Close() {
 	it.it.Close()
 }
+
+func (it *Iterator) IntValue() (int64, error) {
+	return Int(it.Value(), nil)
+}
+
+func (it *Iterator) UintValue() (uint64, error) {
+	return Uint(it.Value(), nil)
+}
+
+func (it *Iterator) FloatValue() (float64, error) {
+	return Float(it.Value(), nil)
+}
+
+func (it *Iterator) StringValue() (string, error) {
+	return String(it.Value(), nil)
+}
+
+func (it *Iterator) SliceValue() ([]byte, error) {
+	return Slice(it.Value(), nil)
+}

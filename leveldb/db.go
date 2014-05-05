@@ -3,8 +3,6 @@ package leveldb
 import (
 	"encoding/json"
 	"github.com/jmhodges/levigo"
-	"github.com/siddontang/golib/hack"
-	"strconv"
 )
 
 const defaultFilterBits int = 10
@@ -159,56 +157,21 @@ func (db *DB) NewSnapshot() *Snapshot {
 }
 
 func (db *DB) GetInt(key []byte) (int64, error) {
-	v, err := db.Get(key)
-	if err != nil {
-		return 0, err
-	} else if v == nil {
-		return 0, nil
-	}
-
-	return strconv.ParseInt(hack.String(v), 10, 64)
+	return Int(db.Get(key))
 }
 
 func (db *DB) GetUInt(key []byte) (uint64, error) {
-	v, err := db.Get(key)
-	if err != nil {
-		return 0, err
-	} else if v == nil {
-		return 0, nil
-	}
-
-	return strconv.ParseUint(hack.String(v), 10, 64)
+	return Uint(db.Get(key))
 }
 
 func (db *DB) GetFloat(key []byte) (float64, error) {
-	v, err := db.Get(key)
-	if err != nil {
-		return 0, err
-	} else if v == nil {
-		return 0, nil
-	}
-
-	return strconv.ParseFloat(hack.String(v), 64)
+	return Float(db.Get(key))
 }
 
 func (db *DB) GetString(key []byte) (string, error) {
-	v, err := db.Get(key)
-	if err != nil {
-		return "", err
-	} else if v == nil {
-		return "", nil
-	}
-
-	return hack.String(v), nil
+	return String(db.Get(key))
 }
 
 func (db *DB) GetSlice(key []byte) ([]byte, error) {
-	v, err := db.Get(key)
-	if err != nil {
-		return nil, err
-	} else if v == nil {
-		return []byte{}, nil
-	}
-
-	return v, nil
+	return Slice(db.Get(key))
 }
