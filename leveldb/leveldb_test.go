@@ -279,6 +279,8 @@ func TestIterator_2(t *testing.T) {
 		t.Fatal(string(it.Key()))
 	}
 
+	it.Close()
+
 	it = db.ReverseIterator([]byte("key_8"), []byte("key_0"), 0)
 	if !it.Valid() {
 		t.Fatal("must valid")
@@ -288,20 +290,27 @@ func TestIterator_2(t *testing.T) {
 		t.Fatal(string(it.Key()))
 	}
 
-	for it := db.Iterator(nil, nil, 0); it.Valid(); it.Next() {
+	it.Close()
+
+	for it = db.Iterator(nil, nil, 0); it.Valid(); it.Next() {
 		db.Delete(it.Key())
 	}
+
+	it.Close()
 
 	it = db.Iterator([]byte("key_0"), []byte("key_8"), 0)
 	if it.Valid() {
 		t.Fatal("must not valid")
 	}
 
+	it.Close()
+
 	it = db.ReverseIterator([]byte("key_8"), []byte("key_0"), 0)
 	if it.Valid() {
 		t.Fatal("must not valid")
 	}
 
+	it.Close()
 }
 
 func TestSnapshot(t *testing.T) {
@@ -324,24 +333,29 @@ func TestSnapshot(t *testing.T) {
 	}
 
 	found := false
-	for it := s.Iterator(nil, nil, 0); it.Valid(); it.Next() {
+	var it *Iterator
+	for it = s.Iterator(nil, nil, 0); it.Valid(); it.Next() {
 		if string(it.Key()) == string(key) {
 			found = true
 			break
 		}
 	}
+
+	it.Close()
 
 	if !found {
 		t.Fatal("must found")
 	}
 
 	found = false
-	for it := s.ReverseIterator(nil, nil, 0); it.Valid(); it.Next() {
+	for it = s.ReverseIterator(nil, nil, 0); it.Valid(); it.Next() {
 		if string(it.Key()) == string(key) {
 			found = true
 			break
 		}
 	}
+
+	it.Close()
 
 	if !found {
 		t.Fatal("must found")
