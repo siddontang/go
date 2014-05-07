@@ -136,6 +136,14 @@ func (it *Iterator) Next() {
 	}
 }
 
+func (it *Iterator) Skip(offset int64) {
+	for i := 0; i < offset; i++ {
+		if it.Valid() {
+			it.Next()
+		}
+	}
+}
+
 func (it *Iterator) Key() []byte {
 	return it.it.Key()
 }
