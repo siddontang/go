@@ -8,11 +8,39 @@ import (
 const forward uint8 = 0
 const backward uint8 = 1
 
+//min must less or equal than max
+//MinEx if true, range is left open interval (min, ...
+//MaxEx if true, range is right open interval ..., max)
+//Default range is close interval
+type Range struct {
+	Min []byte
+	Max []byte
+
+	MinEx bool
+	MaxEx bool
+}
+
+func NewRange(min []byte, max []byte) *Range {
+	return &Range{min, max, false, false}
+}
+
+func NewOpenRange(min []byte, max []byte) *Range {
+	return &Range{min, max, true, true}
+}
+
+func NewLOpenRange(min []byte, max []byte) *Range {
+	return &Range{min, max, true, false}
+}
+
+func NewROpenRange(min []byte, max []byte) *Range {
+	return &Range{min, max, true, true}
+}
+
 type Iterator struct {
 	it *levigo.Iterator
 
-	start []byte
-	stop  []byte
+	r *Range
+
 	limit int
 
 	step int
@@ -21,30 +49,41 @@ type Iterator struct {
 	direction uint8
 }
 
-func newIterator(db *DB, opts *levigo.ReadOptions, start []byte, stop []byte, limit int, direction uint8) *Iterator {
+func newIterator(db *DB, opts *levigo.ReadOptions, r *Range, limit int, direction uint8) *Iterator {
 	it := new(Iterator)
 	it.it = db.db.NewIterator(opts)
 
-	it.start = start
-	it.stop = stop
+	it.r = r
 	it.limit = limit
 	it.direction = direction
 	it.step = 0
 
-	if start == nil {
-		if direction == forward {
+	if direction == forward {
+		if r.Min == nil {
 			it.it.SeekToFirst()
 		} else {
-			it.it.SeekToLast()
+			it.it.Seek(r.Min)
+
+			if r.MinEx {
+				if it.Valid() && bytes.Equal(it.Key(), r.Min) {
+					it.it.Next()
+				}
+			}
 		}
 	} else {
-		it.it.Seek(start)
-
-		if it.Valid() && !bytes.Equal(it.Key(), start) {
-			//for forward, key is the next bigger than start
-			//for backward, key is the next bigger than start, so must go prev
-			if direction == backward {
+		if r.Max == nil {
+			it.it.SeekToLast()
+		} else {
+			it.it.Seek(r.Max)
+			if it.Valid() && !bytes.Equal(it.Key(), r.Max) {
+				//key must bigger than max, so we must go prev
 				it.it.Prev()
+			}
+
+			if r.MaxEx {
+				if it.Valid() && bytes.Equal(it.Key(), r.Max) {
+					it.it.Prev()
+				}
 			}
 		}
 	}
@@ -62,12 +101,22 @@ func (it *Iterator) Valid() bool {
 	}
 
 	if it.direction == forward {
-		if it.stop != nil && bytes.Compare(it.Key(), it.stop) > 0 {
-			return false
+		if it.r.Max != nil {
+			r := bytes.Compare(it.Key(), it.r.Max)
+			if !it.r.MaxEx {
+				return !(r > 0)
+			} else {
+				return !(r >= 0)
+			}
 		}
 	} else {
-		if it.stop != nil && bytes.Compare(it.Key(), it.stop) < 0 {
-			return false
+		if it.r.Min != nil {
+			r := bytes.Compare(it.Key(), it.r.Min)
+			if !it.r.MinEx {
+				return !(r < 0)
+			} else {
+				return !(r <= 0)
+			}
 		}
 	}
 

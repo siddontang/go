@@ -107,210 +107,118 @@ func TestBatch(t *testing.T) {
 	db.Delete(key1)
 }
 
-func TestIterator(t *testing.T) {
-	db := getTestDB()
-	for it := db.Iterator(nil, nil, 0); it.Valid(); it.Next() {
-		db.Delete(it.Key())
-	}
-
-	for i := 0; i < 10; i++ {
-		key := []byte(fmt.Sprintf("key_%d", i))
-		value := []byte(fmt.Sprintf("value_%d", i))
-		db.Put(key, value)
-	}
-
-	step := 0
-	var it *Iterator
-	for it = db.Iterator(nil, nil, 0); it.Valid(); it.Next() {
-		key := it.Key()
-		value := it.Value()
-
-		if string(key) != fmt.Sprintf("key_%d", step) {
-			t.Fatal(string(key), step)
-		}
-
-		if string(value) != fmt.Sprintf("value_%d", step) {
-			t.Fatal(string(value), step)
-		}
-
-		step++
+func checkIterator(it *Iterator, cv ...int) error {
+	v := make([]string, 0, len(cv))
+	for ; it.Valid(); it.Next() {
+		k := it.Key()
+		v = append(v, string(k))
 	}
 
 	it.Close()
 
-	step = 2
-	for it = db.Iterator([]byte("key_2"), nil, 3); it.Valid(); it.Next() {
-		key := it.Key()
-		value := it.Value()
+	if len(v) != len(cv) {
+		return fmt.Errorf("len error %d != %d", len(v), len(cv))
+	}
 
-		if string(key) != fmt.Sprintf("key_%d", step) {
-			t.Fatal(string(key), step)
+	for k, i := range cv {
+		if fmt.Sprintf("key_%d", i) != v[k] {
+			return fmt.Errorf("%s, %d", v[k], i)
 		}
-
-		if string(value) != fmt.Sprintf("value_%d", step) {
-			t.Fatal(string(value), step)
-		}
-
-		step++
-	}
-	it.Close()
-
-	if step != 5 {
-		t.Fatal("invalid step", step)
 	}
 
-	step = 2
-	for it = db.Iterator([]byte("key_2"), []byte("key_5"), 0); it.Valid(); it.Next() {
-		key := it.Key()
-		value := it.Value()
+	return nil
+}
 
-		if string(key) != fmt.Sprintf("key_%d", step) {
-			t.Fatal(string(key), step)
-		}
-
-		if string(value) != fmt.Sprintf("value_%d", step) {
-			t.Fatal(string(value), step)
-		}
-
-		step++
-	}
-	it.Close()
-
-	if step != 6 {
-		t.Fatal("invalid step", step)
-	}
-
-	step = 2
-	for it = db.Iterator([]byte("key_5"), []byte("key_2"), 0); it.Valid(); it.Next() {
-		step++
-	}
-	it.Close()
-
-	if step != 2 {
-		t.Fatal("must 0")
-	}
-
-	step = 9
-	for it = db.ReverseIterator(nil, nil, 0); it.Valid(); it.Next() {
-		key := it.Key()
-		value := it.Value()
-
-		if string(key) != fmt.Sprintf("key_%d", step) {
-			t.Fatal(string(key), step)
-		}
-
-		if string(value) != fmt.Sprintf("value_%d", step) {
-			t.Fatal(string(value), step)
-		}
-
-		step--
-	}
-	it.Close()
-
-	step = 5
-	for it = db.ReverseIterator([]byte("key_5"), nil, 3); it.Valid(); it.Next() {
-		key := it.Key()
-		value := it.Value()
-
-		if string(key) != fmt.Sprintf("key_%d", step) {
-			t.Fatal(string(key), step)
-		}
-
-		if string(value) != fmt.Sprintf("value_%d", step) {
-			t.Fatal(string(value), step)
-		}
-
-		step--
-	}
-	it.Close()
-
-	if step != 2 {
-		t.Fatal("invalid step", step)
-	}
-
-	step = 5
-	for it = db.ReverseIterator([]byte("key_5"), []byte("key_2"), 0); it.Valid(); it.Next() {
-		key := it.Key()
-		value := it.Value()
-
-		if string(key) != fmt.Sprintf("key_%d", step) {
-			t.Fatal(string(key), step)
-		}
-
-		if string(value) != fmt.Sprintf("value_%d", step) {
-			t.Fatal(string(value), step)
-		}
-
-		step--
-	}
-	it.Close()
-
-	if step != 1 {
-		t.Fatal("invalid step", step)
-	}
-
-	step = 5
-	for it = db.ReverseIterator([]byte("key_2"), []byte("key_5"), 0); it.Valid(); it.Next() {
-		step--
-	}
-	it.Close()
-
-	if step != 5 {
-		t.Fatal("must 5")
+func testKeyRange(min int, max int) *Range {
+	return &Range{
+		[]byte(fmt.Sprintf("key_%d", min)),
+		[]byte(fmt.Sprintf("key_%d", max)),
+		false,
+		false,
 	}
 }
 
-func TestIterator_2(t *testing.T) {
+func testLKeyRange(min int, max int) *Range {
+	r := testKeyRange(min, max)
+	r.MinEx = true
+	return r
+}
+
+func testRKeyRange(min int, max int) *Range {
+	r := testKeyRange(min, max)
+	r.MaxEx = true
+	return r
+}
+
+func testOpenKeyRange(min int, max int) *Range {
+	r := testKeyRange(min, max)
+	r.MinEx = true
+	r.MaxEx = true
+	return r
+}
+
+func TestIterator(t *testing.T) {
 	db := getTestDB()
-	for it := db.Iterator(nil, nil, 0); it.Valid(); it.Next() {
-		db.Delete(it.Key())
+
+	db.Clear()
+
+	for i := 0; i < 10; i++ {
+		key := []byte(fmt.Sprintf("key_%d", i))
+		value := []byte("")
+		db.Put(key, value)
 	}
 
-	db.Put([]byte("key_1"), []byte("value_1"))
-	db.Put([]byte("key_7"), []byte("value_9"))
-	db.Put([]byte("key_9"), []byte("value_9"))
+	var it *Iterator
 
-	it := db.Iterator([]byte("key_0"), []byte("key_8"), 0)
-	if !it.Valid() {
-		t.Fatal("must valid")
+	it = db.Iterator(testKeyRange(1, 5), 0)
+	if err := checkIterator(it, 1, 2, 3, 4, 5); err != nil {
+		t.Fatal(err)
 	}
 
-	if string(it.Key()) != "key_1" {
-		t.Fatal(string(it.Key()))
+	it = db.Iterator(testKeyRange(1, 9), 5)
+	if err := checkIterator(it, 1, 2, 3, 4, 5); err != nil {
+		t.Fatal(err)
 	}
 
-	it.Close()
-
-	it = db.ReverseIterator([]byte("key_8"), []byte("key_0"), 0)
-	if !it.Valid() {
-		t.Fatal("must valid")
+	it = db.Iterator(testLKeyRange(1, 5), 0)
+	if err := checkIterator(it, 2, 3, 4, 5); err != nil {
+		t.Fatal(err)
 	}
 
-	if string(it.Key()) != "key_7" {
-		t.Fatal(string(it.Key()))
+	it = db.Iterator(testRKeyRange(1, 5), 0)
+	if err := checkIterator(it, 1, 2, 3, 4); err != nil {
+		t.Fatal(err)
 	}
 
-	it.Close()
-
-	for it = db.Iterator(nil, nil, 0); it.Valid(); it.Next() {
-		db.Delete(it.Key())
+	it = db.Iterator(testOpenKeyRange(1, 5), 0)
+	if err := checkIterator(it, 2, 3, 4); err != nil {
+		t.Fatal(err)
 	}
 
-	it.Close()
-
-	it = db.Iterator([]byte("key_0"), []byte("key_8"), 0)
-	if it.Valid() {
-		t.Fatal("must not valid")
+	it = db.ReverseIterator(testKeyRange(1, 5), 0)
+	if err := checkIterator(it, 5, 4, 3, 2, 1); err != nil {
+		t.Fatal(err)
 	}
 
-	it.Close()
-
-	it = db.ReverseIterator([]byte("key_8"), []byte("key_0"), 0)
-	if it.Valid() {
-		t.Fatal("must not valid")
+	it = db.ReverseIterator(testKeyRange(1, 9), 5)
+	if err := checkIterator(it, 9, 8, 7, 6, 5); err != nil {
+		t.Fatal(err)
 	}
 
-	it.Close()
+	it = db.ReverseIterator(testLKeyRange(1, 5), 0)
+	if err := checkIterator(it, 5, 4, 3, 2); err != nil {
+		t.Fatal(err)
+	}
+
+	it = db.ReverseIterator(testRKeyRange(1, 5), 0)
+	if err := checkIterator(it, 4, 3, 2, 1); err != nil {
+		t.Fatal(err)
+	}
+
+	it = db.ReverseIterator(testOpenKeyRange(1, 5), 0)
+	if err := checkIterator(it, 4, 3, 2); err != nil {
+		t.Fatal(err)
+	}
 }
 
 func TestSnapshot(t *testing.T) {
@@ -331,36 +239,6 @@ func TestSnapshot(t *testing.T) {
 	} else if string(v) != string(value) {
 		t.Fatal(string(v))
 	}
-
-	found := false
-	var it *Iterator
-	for it = s.Iterator(nil, nil, 0); it.Valid(); it.Next() {
-		if string(it.Key()) == string(key) {
-			found = true
-			break
-		}
-	}
-
-	it.Close()
-
-	if !found {
-		t.Fatal("must found")
-	}
-
-	found = false
-	for it = s.ReverseIterator(nil, nil, 0); it.Valid(); it.Next() {
-		if string(it.Key()) == string(key) {
-			found = true
-			break
-		}
-	}
-
-	it.Close()
-
-	if !found {
-		t.Fatal("must found")
-	}
-
 }
 
 func TestDestroy(t *testing.T) {

@@ -115,6 +115,13 @@ func (db *DB) Destroy() {
 	levigo.DestroyDatabase(db.cfg.Path, opts)
 }
 
+func (db *DB) Clear() {
+	it := db.Iterator(NewRange(nil, nil), 0)
+	for ; it.Valid(); it.Next() {
+		db.Delete(it.Key())
+	}
+}
+
 func (db *DB) Put(key, value []byte) error {
 	return db.db.Put(db.writeOpts, key, value)
 }
@@ -134,21 +141,14 @@ func (db *DB) NewWriteBatch() *WriteBatch {
 	return wb
 }
 
-//[begin, end]  close(inclusive) interval
-//if begin is nil, we will seek to first
-//if end is nil, we will seek to last
 //limit <= 0, no limit
-func (db *DB) Iterator(begin []byte, end []byte, limit int) *Iterator {
-	return newIterator(db, db.iteratorOpts, begin, end, limit, forward)
+func (db *DB) Iterator(r *Range, limit int) *Iterator {
+	return newIterator(db, db.iteratorOpts, r, limit, forward)
 }
 
-//[rbegin, rend] close(inclusive) interval
-//rbegin should bigger than rend
-//if rbegin is nil, we will seek to last
-//if end is nil, we will seek to first
 //limit <= 0, no limit
-func (db *DB) ReverseIterator(rbegin []byte, rend []byte, limit int) *Iterator {
-	return newIterator(db, db.iteratorOpts, rbegin, rend, limit, backward)
+func (db *DB) ReverseIterator(r *Range, limit int) *Iterator {
+	return newIterator(db, db.iteratorOpts, r, limit, backward)
 }
 
 func (db *DB) NewSnapshot() *Snapshot {

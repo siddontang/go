@@ -38,12 +38,12 @@ func (s *Snapshot) Get(key []byte) ([]byte, error) {
 }
 
 //same as db iterator and reverse iterator
-func (s *Snapshot) Iterator(begin []byte, end []byte, limit int) *Iterator {
-	return newIterator(s.db, s.iteratorOpts, begin, end, limit, forward)
+func (s *Snapshot) Iterator(r *Range, limit int) *Iterator {
+	return newIterator(s.db, s.iteratorOpts, r, limit, forward)
 }
 
-func (s *Snapshot) ReverseIterator(rbegin []byte, rend []byte, limit int) *Iterator {
-	return newIterator(s.db, s.iteratorOpts, rbegin, rend, limit, backward)
+func (s *Snapshot) ReverseIterator(r *Range, limit int) *Iterator {
+	return newIterator(s.db, s.iteratorOpts, r, limit, backward)
 }
 
 func (s *Snapshot) GetInt(key []byte) (int64, error) {
