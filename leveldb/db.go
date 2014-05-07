@@ -134,19 +134,18 @@ func (db *DB) NewWriteBatch() *WriteBatch {
 	return wb
 }
 
-//like c++ iterator, [begin, end)
-//begin should less than end
+//[begin, end]  close(inclusive) interval
 //if begin is nil, we will seek to first
-//if end is nil, we will next until read last
+//if end is nil, we will seek to last
 //limit <= 0, no limit
 func (db *DB) Iterator(begin []byte, end []byte, limit int) *Iterator {
 	return newIterator(db, db.iteratorOpts, begin, end, limit, forward)
 }
 
-//like c++ reverse_iterator, [rbegin, rend)
+//[rbegin, rend] close(inclusive) interval
 //rbegin should bigger than rend
 //if rbegin is nil, we will seek to last
-//if end is nil, we will next until read first
+//if end is nil, we will seek to first
 //limit <= 0, no limit
 func (db *DB) ReverseIterator(rbegin []byte, rend []byte, limit int) *Iterator {
 	return newIterator(db, db.iteratorOpts, rbegin, rend, limit, backward)

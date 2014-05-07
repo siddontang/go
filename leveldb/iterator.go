@@ -62,11 +62,11 @@ func (it *Iterator) Valid() bool {
 	}
 
 	if it.direction == forward {
-		if it.stop != nil && bytes.Compare(it.Key(), it.stop) >= 0 {
+		if it.stop != nil && bytes.Compare(it.Key(), it.stop) > 0 {
 			return false
 		}
 	} else {
-		if it.stop != nil && bytes.Compare(it.Key(), it.stop) <= 0 {
+		if it.stop != nil && bytes.Compare(it.Key(), it.stop) < 0 {
 			return false
 		}
 	}

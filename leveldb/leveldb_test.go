@@ -176,7 +176,7 @@ func TestIterator(t *testing.T) {
 	}
 	it.Close()
 
-	if step != 5 {
+	if step != 6 {
 		t.Fatal("invalid step", step)
 	}
 
@@ -245,7 +245,7 @@ func TestIterator(t *testing.T) {
 	}
 	it.Close()
 
-	if step != 2 {
+	if step != 1 {
 		t.Fatal("invalid step", step)
 	}
 
