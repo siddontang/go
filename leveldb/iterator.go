@@ -5,35 +5,33 @@ import (
 	"github.com/jmhodges/levigo"
 )
 
-const forward uint8 = 0
-const backward uint8 = 1
+const (
+	IteratorForward  uint8 = 0
+	IteratorBackward uint8 = 1
+)
+
+const (
+	RangeClose uint8 = 0x00
+	RangeLOpen uint8 = 0x01
+	RangeROpen uint8 = 0x10
+	RangeOpen  uint8 = 0x11
+)
 
 //min must less or equal than max
-//MinEx if true, range is left open interval (min, ...
-//MaxEx if true, range is right open interval ..., max)
-//Default range is close interval
+//range type:
+//close: [min, max]
+//open: (min, max)
+//lopen: (min, max]
+//ropen: [min, max)
 type Range struct {
 	Min []byte
 	Max []byte
 
-	MinEx bool
-	MaxEx bool
+	Type uint8
 }
 
-func NewRange(min []byte, max []byte) *Range {
-	return &Range{min, max, false, false}
-}
-
-func NewOpenRange(min []byte, max []byte) *Range {
-	return &Range{min, max, true, true}
-}
-
-func NewLOpenRange(min []byte, max []byte) *Range {
-	return &Range{min, max, true, false}
-}
-
-func NewROpenRange(min []byte, max []byte) *Range {
-	return &Range{min, max, true, true}
+func NewRange(min []byte, max []byte, tp uint8) *Range {
+	return &Range{min, max, tp}
 }
 
 type Iterator struct {
@@ -45,7 +43,7 @@ type Iterator struct {
 
 	step int
 
-	//0 for forward, 1 for backward
+	//0 for IteratorForward, 1 for IteratorBackward
 	direction uint8
 }
 
@@ -56,15 +54,16 @@ func newIterator(db *DB, opts *levigo.ReadOptions, r *Range, limit int, directio
 	it.r = r
 	it.limit = limit
 	it.direction = direction
+
 	it.step = 0
 
-	if direction == forward {
+	if direction == IteratorForward {
 		if r.Min == nil {
 			it.it.SeekToFirst()
 		} else {
 			it.it.Seek(r.Min)
 
-			if r.MinEx {
+			if r.Type&RangeLOpen > 0 {
 				if it.Valid() && bytes.Equal(it.Key(), r.Min) {
 					it.it.Next()
 				}
@@ -80,7 +79,7 @@ func newIterator(db *DB, opts *levigo.ReadOptions, r *Range, limit int, directio
 				it.it.Prev()
 			}
 
-			if r.MaxEx {
+			if r.Type&RangeROpen > 0 {
 				if it.Valid() && bytes.Equal(it.Key(), r.Max) {
 					it.it.Prev()
 				}
@@ -100,22 +99,22 @@ func (it *Iterator) Valid() bool {
 		return false
 	}
 
-	if it.direction == forward {
+	if it.direction == IteratorForward {
 		if it.r.Max != nil {
 			r := bytes.Compare(it.Key(), it.r.Max)
-			if !it.r.MaxEx {
-				return !(r > 0)
-			} else {
+			if it.r.Type&RangeROpen > 0 {
 				return !(r >= 0)
+			} else {
+				return !(r > 0)
 			}
 		}
 	} else {
 		if it.r.Min != nil {
 			r := bytes.Compare(it.Key(), it.r.Min)
-			if !it.r.MinEx {
-				return !(r < 0)
-			} else {
+			if it.r.Type&RangeLOpen > 0 {
 				return !(r <= 0)
+			} else {
+				return !(r < 0)
 			}
 		}
 	}
@@ -130,7 +129,7 @@ func (it *Iterator) GetError() error {
 func (it *Iterator) Next() {
 	it.step++
 
-	if it.direction == forward {
+	if it.direction == IteratorForward {
 		it.it.Next()
 	} else {
 		it.it.Prev()

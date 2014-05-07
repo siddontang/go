@@ -129,34 +129,6 @@ func checkIterator(it *Iterator, cv ...int) error {
 	return nil
 }
 
-func testKeyRange(min int, max int) *Range {
-	return &Range{
-		[]byte(fmt.Sprintf("key_%d", min)),
-		[]byte(fmt.Sprintf("key_%d", max)),
-		false,
-		false,
-	}
-}
-
-func testLKeyRange(min int, max int) *Range {
-	r := testKeyRange(min, max)
-	r.MinEx = true
-	return r
-}
-
-func testRKeyRange(min int, max int) *Range {
-	r := testKeyRange(min, max)
-	r.MaxEx = true
-	return r
-}
-
-func testOpenKeyRange(min int, max int) *Range {
-	r := testKeyRange(min, max)
-	r.MinEx = true
-	r.MaxEx = true
-	return r
-}
-
 func TestIterator(t *testing.T) {
 	db := getTestDB()
 
@@ -170,52 +142,56 @@ func TestIterator(t *testing.T) {
 
 	var it *Iterator
 
-	it = db.Iterator(testKeyRange(1, 5), 0)
+	k := func(i int) []byte {
+		return []byte(fmt.Sprintf("key_%d", i))
+	}
+
+	it = db.Iterator(k(1), k(5), RangeClose, 0)
 	if err := checkIterator(it, 1, 2, 3, 4, 5); err != nil {
 		t.Fatal(err)
 	}
 
-	it = db.Iterator(testKeyRange(1, 9), 5)
-	if err := checkIterator(it, 1, 2, 3, 4, 5); err != nil {
+	it = db.Iterator(k(1), k(5), RangeClose, 3)
+	if err := checkIterator(it, 1, 2, 3); err != nil {
 		t.Fatal(err)
 	}
 
-	it = db.Iterator(testLKeyRange(1, 5), 0)
+	it = db.Iterator(k(1), k(5), RangeLOpen, 0)
 	if err := checkIterator(it, 2, 3, 4, 5); err != nil {
 		t.Fatal(err)
 	}
 
-	it = db.Iterator(testRKeyRange(1, 5), 0)
+	it = db.Iterator(k(1), k(5), RangeROpen, 0)
 	if err := checkIterator(it, 1, 2, 3, 4); err != nil {
 		t.Fatal(err)
 	}
 
-	it = db.Iterator(testOpenKeyRange(1, 5), 0)
+	it = db.Iterator(k(1), k(5), RangeOpen, 0)
 	if err := checkIterator(it, 2, 3, 4); err != nil {
 		t.Fatal(err)
 	}
 
-	it = db.ReverseIterator(testKeyRange(1, 5), 0)
+	it = db.RevIterator(k(1), k(5), RangeClose, 0)
 	if err := checkIterator(it, 5, 4, 3, 2, 1); err != nil {
 		t.Fatal(err)
 	}
 
-	it = db.ReverseIterator(testKeyRange(1, 9), 5)
-	if err := checkIterator(it, 9, 8, 7, 6, 5); err != nil {
+	it = db.RevIterator(k(1), k(5), RangeClose, 3)
+	if err := checkIterator(it, 5, 4, 3); err != nil {
 		t.Fatal(err)
 	}
 
-	it = db.ReverseIterator(testLKeyRange(1, 5), 0)
+	it = db.RevIterator(k(1), k(5), RangeLOpen, 0)
 	if err := checkIterator(it, 5, 4, 3, 2); err != nil {
 		t.Fatal(err)
 	}
 
-	it = db.ReverseIterator(testRKeyRange(1, 5), 0)
+	it = db.RevIterator(k(1), k(5), RangeROpen, 0)
 	if err := checkIterator(it, 4, 3, 2, 1); err != nil {
 		t.Fatal(err)
 	}
 
-	it = db.ReverseIterator(testOpenKeyRange(1, 5), 0)
+	it = db.RevIterator(k(1), k(5), RangeOpen, 0)
 	if err := checkIterator(it, 4, 3, 2); err != nil {
 		t.Fatal(err)
 	}
