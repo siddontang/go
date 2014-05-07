@@ -37,12 +37,12 @@ func (s *Snapshot) Get(key []byte) ([]byte, error) {
 	return s.db.db.Get(s.readOpts, key)
 }
 
-func (s *Snapshot) Iterator(min []byte, max []byte, rangeType uint8, limit int) *Iterator {
-	return newIterator(s.db, s.iteratorOpts, NewRange(min, max, rangeType), limit, IteratorForward)
+func (s *Snapshot) Iterator(min []byte, max []byte, rangeType uint8, offset int, limit int) *Iterator {
+	return newIterator(s.db, s.iteratorOpts, NewRange(min, max, rangeType), offset, limit, IteratorForward)
 }
 
-func (s *Snapshot) RevIterator(min []byte, max []byte, rangeType uint8, limit int) *Iterator {
-	return newIterator(s.db, s.iteratorOpts, NewRange(min, max, rangeType), limit, IteratorBackward)
+func (s *Snapshot) RevIterator(min []byte, max []byte, rangeType uint8, offset int, limit int) *Iterator {
+	return newIterator(s.db, s.iteratorOpts, NewRange(min, max, rangeType), offset, limit, IteratorBackward)
 }
 
 func (s *Snapshot) GetInt(key []byte) (int64, error) {

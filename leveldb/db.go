@@ -116,7 +116,7 @@ func (db *DB) Destroy() {
 }
 
 func (db *DB) Clear() {
-	it := db.Iterator(nil, nil, 0, -1)
+	it := db.Iterator(nil, nil, 0, 0, -1)
 	for ; it.Valid(); it.Next() {
 		db.Delete(it.Key())
 	}
@@ -142,13 +142,15 @@ func (db *DB) NewWriteBatch() *WriteBatch {
 }
 
 //limit < 0, unlimit
-func (db *DB) Iterator(min []byte, max []byte, rangeType uint8, limit int) *Iterator {
-	return newIterator(db, db.iteratorOpts, NewRange(min, max, rangeType), limit, IteratorForward)
+//offset must >= 0, if < 0, will get nothing
+func (db *DB) Iterator(min []byte, max []byte, rangeType uint8, offset int, limit int) *Iterator {
+	return newIterator(db, db.iteratorOpts, NewRange(min, max, rangeType), offset, limit, IteratorForward)
 }
 
 //limit < 0, unlimit
-func (db *DB) RevIterator(min []byte, max []byte, rangeType uint8, limit int) *Iterator {
-	return newIterator(db, db.iteratorOpts, NewRange(min, max, rangeType), limit, IteratorBackward)
+//offset must >= 0, if < 0, will get nothing
+func (db *DB) RevIterator(min []byte, max []byte, rangeType uint8, offset int, limit int) *Iterator {
+	return newIterator(db, db.iteratorOpts, NewRange(min, max, rangeType), offset, limit, IteratorBackward)
 }
 
 func (db *DB) NewSnapshot() *Snapshot {

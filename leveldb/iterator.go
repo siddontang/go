@@ -39,7 +39,8 @@ type Iterator struct {
 
 	r *Range
 
-	limit int
+	offset int
+	limit  int
 
 	step int
 
@@ -47,15 +48,20 @@ type Iterator struct {
 	direction uint8
 }
 
-func newIterator(db *DB, opts *levigo.ReadOptions, r *Range, limit int, direction uint8) *Iterator {
+func newIterator(db *DB, opts *levigo.ReadOptions, r *Range, offset int, limit int, direction uint8) *Iterator {
 	it := new(Iterator)
 	it.it = db.db.NewIterator(opts)
 
 	it.r = r
+	it.offset = offset
 	it.limit = limit
 	it.direction = direction
 
 	it.step = 0
+
+	if offset < 0 {
+		return it
+	}
 
 	if direction == IteratorForward {
 		if r.Min == nil {
@@ -64,7 +70,7 @@ func newIterator(db *DB, opts *levigo.ReadOptions, r *Range, limit int, directio
 			it.it.Seek(r.Min)
 
 			if r.Type&RangeLOpen > 0 {
-				if it.Valid() && bytes.Equal(it.Key(), r.Min) {
+				if it.it.Valid() && bytes.Equal(it.it.Key(), r.Min) {
 					it.it.Next()
 				}
 			}
@@ -74,9 +80,13 @@ func newIterator(db *DB, opts *levigo.ReadOptions, r *Range, limit int, directio
 			it.it.SeekToLast()
 		} else {
 			it.it.Seek(r.Max)
-			if it.Valid() && !bytes.Equal(it.Key(), r.Max) {
-				//key must bigger than max, so we must go prev
-				it.it.Prev()
+
+			if !it.it.Valid() {
+				it.it.SeekToLast()
+			} else {
+				if !bytes.Equal(it.it.Key(), r.Max) {
+					it.it.Prev()
+				}
 			}
 
 			if r.Type&RangeROpen > 0 {
@@ -87,15 +97,21 @@ func newIterator(db *DB, opts *levigo.ReadOptions, r *Range, limit int, directio
 		}
 	}
 
+	for i := 0; i < offset; i++ {
+		if it.Valid() {
+			it.Next()
+		}
+	}
+
 	return it
 }
 
 func (it *Iterator) Valid() bool {
-	if !it.it.Valid() {
+	if it.offset < 0 {
 		return false
-	}
-
-	if it.limit >= 0 && it.step >= it.limit {
+	} else if !it.it.Valid() {
+		return false
+	} else if it.limit >= 0 && it.step >= it.limit {
 		return false
 	}
 
@@ -133,14 +149,6 @@ func (it *Iterator) Next() {
 		it.it.Next()
 	} else {
 		it.it.Prev()
-	}
-}
-
-func (it *Iterator) Skip(offset int64) {
-	for i := int64(0); i < offset; i++ {
-		if it.Valid() {
-			it.Next()
-		}
 	}
 }
 
