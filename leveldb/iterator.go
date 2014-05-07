@@ -95,7 +95,7 @@ func (it *Iterator) Valid() bool {
 		return false
 	}
 
-	if it.limit > 0 && it.step >= it.limit {
+	if it.limit >= 0 && it.step >= it.limit {
 		return false
 	}
 

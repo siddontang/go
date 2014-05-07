@@ -146,7 +146,7 @@ func TestIterator(t *testing.T) {
 		return []byte(fmt.Sprintf("key_%d", i))
 	}
 
-	it = db.Iterator(k(1), k(5), RangeClose, 0)
+	it = db.Iterator(k(1), k(5), RangeClose, -1)
 	if err := checkIterator(it, 1, 2, 3, 4, 5); err != nil {
 		t.Fatal(err)
 	}
@@ -156,22 +156,22 @@ func TestIterator(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	it = db.Iterator(k(1), k(5), RangeLOpen, 0)
+	it = db.Iterator(k(1), k(5), RangeLOpen, -1)
 	if err := checkIterator(it, 2, 3, 4, 5); err != nil {
 		t.Fatal(err)
 	}
 
-	it = db.Iterator(k(1), k(5), RangeROpen, 0)
+	it = db.Iterator(k(1), k(5), RangeROpen, -1)
 	if err := checkIterator(it, 1, 2, 3, 4); err != nil {
 		t.Fatal(err)
 	}
 
-	it = db.Iterator(k(1), k(5), RangeOpen, 0)
+	it = db.Iterator(k(1), k(5), RangeOpen, -1)
 	if err := checkIterator(it, 2, 3, 4); err != nil {
 		t.Fatal(err)
 	}
 
-	it = db.RevIterator(k(1), k(5), RangeClose, 0)
+	it = db.RevIterator(k(1), k(5), RangeClose, -1)
 	if err := checkIterator(it, 5, 4, 3, 2, 1); err != nil {
 		t.Fatal(err)
 	}
@@ -181,17 +181,17 @@ func TestIterator(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	it = db.RevIterator(k(1), k(5), RangeLOpen, 0)
+	it = db.RevIterator(k(1), k(5), RangeLOpen, -1)
 	if err := checkIterator(it, 5, 4, 3, 2); err != nil {
 		t.Fatal(err)
 	}
 
-	it = db.RevIterator(k(1), k(5), RangeROpen, 0)
+	it = db.RevIterator(k(1), k(5), RangeROpen, -1)
 	if err := checkIterator(it, 4, 3, 2, 1); err != nil {
 		t.Fatal(err)
 	}
 
-	it = db.RevIterator(k(1), k(5), RangeOpen, 0)
+	it = db.RevIterator(k(1), k(5), RangeOpen, -1)
 	if err := checkIterator(it, 4, 3, 2); err != nil {
 		t.Fatal(err)
 	}

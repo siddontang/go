@@ -141,12 +141,12 @@ func (db *DB) NewWriteBatch() *WriteBatch {
 	return wb
 }
 
-//limit <= 0, unlimit
+//limit < 0, unlimit
 func (db *DB) Iterator(min []byte, max []byte, rangeType uint8, limit int) *Iterator {
 	return newIterator(db, db.iteratorOpts, NewRange(min, max, rangeType), limit, IteratorForward)
 }
 
-//limit <= 0, unlimit
+//limit < 0, unlimit
 func (db *DB) RevIterator(min []byte, max []byte, rangeType uint8, limit int) *Iterator {
 	return newIterator(db, db.iteratorOpts, NewRange(min, max, rangeType), limit, IteratorBackward)
 }
