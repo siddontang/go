@@ -116,7 +116,7 @@ func (db *DB) Destroy() {
 }
 
 func (db *DB) Clear() {
-	it := db.Iterator(nil, nil, 0, 0)
+	it := db.Iterator(nil, nil, 0, -1)
 	for ; it.Valid(); it.Next() {
 		db.Delete(it.Key())
 	}
