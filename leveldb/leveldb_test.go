@@ -152,7 +152,7 @@ func TestIterator(t *testing.T) {
 	}
 
 	it = db.Iterator(k(1), k(5), RangeClose, 1, 3)
-	if err := checkIterator(it, 2, 3); err != nil {
+	if err := checkIterator(it, 2, 3, 4); err != nil {
 		t.Fatal(err)
 	}
 
@@ -177,7 +177,7 @@ func TestIterator(t *testing.T) {
 	}
 
 	it = db.RevIterator(k(1), k(5), RangeClose, 1, 3)
-	if err := checkIterator(it, 4, 3); err != nil {
+	if err := checkIterator(it, 4, 3, 2); err != nil {
 		t.Fatal(err)
 	}
 

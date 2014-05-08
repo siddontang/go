@@ -98,8 +98,12 @@ func newIterator(db *DB, opts *levigo.ReadOptions, r *Range, offset int, limit i
 	}
 
 	for i := 0; i < offset; i++ {
-		if it.Valid() {
-			it.Next()
+		if it.it.Valid() {
+			if it.direction == IteratorForward {
+				it.it.Next()
+			} else {
+				it.it.Prev()
+			}
 		}
 	}
 
