@@ -2,10 +2,17 @@ a leveldb wrapper for levigo
 
 simplify use leveldb in go
 
+# Build leveldb
+
+see [https://gist.github.com/siddontang/dfbc835e06e47d0f6297](https://gist.github.com/siddontang/dfbc835e06e47d0f6297) for build leveldb
+
 # Install
 
-+ download leveldb and snappy source, uncompress and set source directory in build_deps.sh
-+ . ./build_deps.sh
+you must first set CGO_CFLAGS, CGO_LDFLAGS to your leveldb and snappy directory.
+
+dev.sh may help you:
+
+    . ./dev.sh
 
 # Performance
 
