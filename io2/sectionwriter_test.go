@@ -1,4 +1,4 @@
-package ioext
+package io2
 
 import (
 	"io/ioutil"

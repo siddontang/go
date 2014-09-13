@@ -1,4 +1,4 @@
-package list
+package list2
 
 const defaultSize = 1024
 

@@ -35,21 +35,3 @@ func TestByte(t *testing.T) {
 		t.Fatal(string(b))
 	}
 }
-
-func TestInt(t *testing.T) {
-	if int64(binary.LittleEndian.Uint64(IntSlice(1))) != 1 {
-		t.Fatal("error")
-	}
-
-	if int64(binary.LittleEndian.Uint64(IntSlice(-1))) != -1 {
-		t.Fatal("error")
-	}
-
-	if int64(binary.LittleEndian.Uint64(IntSlice(32768))) != 32768 {
-		t.Fatal(1)
-	}
-
-	if int64(binary.LittleEndian.Uint64(IntSlice(-32768))) != -32768 {
-		t.Fatal(1)
-	}
-}

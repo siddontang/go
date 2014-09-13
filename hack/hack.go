@@ -25,19 +25,3 @@ func Slice(s string) (b []byte) {
 	pbytes.Cap = pstring.Len
 	return
 }
-
-func Int64Slice(v int64) (b []byte) {
-	pbytes := (*reflect.SliceHeader)(unsafe.Pointer(&b))
-	pbytes.Data = uintptr(unsafe.Pointer(&v))
-	pbytes.Len = 8
-	pbytes.Cap = 8
-	return
-}
-
-func Int32Slice(v int32) (b []byte) {
-	pbytes := (*reflect.SliceHeader)(unsafe.Pointer(&b))
-	pbytes.Data = uintptr(unsafe.Pointer(&v))
-	pbytes.Len = 4
-	pbytes.Cap = 4
-	return
-}
