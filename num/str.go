@@ -115,3 +115,43 @@ func Uint32ToString(v uint32) string {
 func Uint64ToString(v uint64) string {
 	return strconv.FormatUint(uint64(v), 10)
 }
+
+func IntToSlice(v int) []byte {
+	return strconv.AppendInt(nil, int64(v), 10)
+}
+
+func Int8ToSlice(v int8) []byte {
+	return strconv.AppendInt(nil, int64(v), 10)
+}
+
+func Int16Slice(v int16) []byte {
+	return strconv.AppendInt(nil, int64(v), 10)
+}
+
+func Int32ToSlice(v int32) []byte {
+	return strconv.AppendInt(nil, int64(v), 10)
+}
+
+func Int64ToSlice(v int64) []byte {
+	return strconv.AppendInt(nil, int64(v), 10)
+}
+
+func UintToSlice(v uint) []byte {
+	return strconv.AppendUint(nil, uint64(v), 10)
+}
+
+func Uint8ToSlice(v uint8) []byte {
+	return strconv.AppendUint(nil, uint64(v), 10)
+}
+
+func Uint16ToSlice(v uint16) []byte {
+	return strconv.AppendUint(nil, uint64(v), 10)
+}
+
+func Uint32ToSlice(v uint32) []byte {
+	return strconv.AppendUint(nil, uint64(v), 10)
+}
+
+func Uint64ToSlice(v uint64) []byte {
+	return strconv.AppendUint(nil, uint64(v), 10)
+}
