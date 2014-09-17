@@ -31,3 +31,9 @@ func WriteFileAtomic(filename string, data []byte, perm os.FileMode) error {
 	}
 	return os.Rename(f.Name(), filename)
 }
+
+// Check file exists or not
+func FileExists(name string) bool {
+	_, err := os.Stat(name)
+	return !os.IsNotExist(err)
+}
