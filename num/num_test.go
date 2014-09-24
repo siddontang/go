@@ -144,6 +144,18 @@ func TestBytes(t *testing.T) {
 	if BytesToUint16(Uint16ToBytes(1)) != 1 {
 		t.Fatal("convert fail")
 	}
+
+	if BytesToInt64(Int64ToBytes(-1)) != -1 {
+		t.Fatal("convert fail")
+	}
+
+	if BytesToInt32(Int32ToBytes(-1)) != -1 {
+		t.Fatal("convert fail")
+	}
+
+	if BytesToInt16(Int16ToBytes(-1)) != -1 {
+		t.Fatal("convert fail")
+	}
 }
 
 func TestStr(t *testing.T) {
