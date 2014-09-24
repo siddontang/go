@@ -4,7 +4,7 @@ import (
 	"strconv"
 )
 
-func StringToUint(s string) (uint, error) {
+func ParseUint(s string) (uint, error) {
 	if v, err := strconv.ParseUint(s, 10, 0); err != nil {
 		return 0, err
 	} else {
@@ -12,7 +12,7 @@ func StringToUint(s string) (uint, error) {
 	}
 }
 
-func StringToUint8(s string) (uint8, error) {
+func ParseUint8(s string) (uint8, error) {
 	if v, err := strconv.ParseUint(s, 10, 8); err != nil {
 		return 0, err
 	} else {
@@ -20,7 +20,7 @@ func StringToUint8(s string) (uint8, error) {
 	}
 }
 
-func StringToUint16(s string) (uint16, error) {
+func ParseUint16(s string) (uint16, error) {
 	if v, err := strconv.ParseUint(s, 10, 16); err != nil {
 		return 0, err
 	} else {
@@ -28,7 +28,7 @@ func StringToUint16(s string) (uint16, error) {
 	}
 }
 
-func StringToUint32(s string) (uint32, error) {
+func ParseUint32(s string) (uint32, error) {
 	if v, err := strconv.ParseUint(s, 10, 32); err != nil {
 		return 0, err
 	} else {
@@ -36,11 +36,11 @@ func StringToUint32(s string) (uint32, error) {
 	}
 }
 
-func StringToUint64(s string) (uint64, error) {
+func ParseUint64(s string) (uint64, error) {
 	return strconv.ParseUint(s, 10, 64)
 }
 
-func StringToInt(s string) (int, error) {
+func ParseInt(s string) (int, error) {
 	if v, err := strconv.ParseInt(s, 10, 0); err != nil {
 		return 0, err
 	} else {
@@ -48,7 +48,7 @@ func StringToInt(s string) (int, error) {
 	}
 }
 
-func StringToInt8(s string) (int8, error) {
+func ParseInt8(s string) (int8, error) {
 	if v, err := strconv.ParseInt(s, 10, 8); err != nil {
 		return 0, err
 	} else {
@@ -56,7 +56,7 @@ func StringToInt8(s string) (int8, error) {
 	}
 }
 
-func StringToInt16(s string) (int16, error) {
+func ParseInt16(s string) (int16, error) {
 	if v, err := strconv.ParseInt(s, 10, 16); err != nil {
 		return 0, err
 	} else {
@@ -64,7 +64,7 @@ func StringToInt16(s string) (int16, error) {
 	}
 }
 
-func StringToInt32(s string) (int32, error) {
+func ParseInt32(s string) (int32, error) {
 	if v, err := strconv.ParseInt(s, 10, 32); err != nil {
 		return 0, err
 	} else {
@@ -72,86 +72,86 @@ func StringToInt32(s string) (int32, error) {
 	}
 }
 
-func StringToInt64(s string) (int64, error) {
+func ParseInt64(s string) (int64, error) {
 	return strconv.ParseInt(s, 10, 64)
 }
 
-func IntToString(v int) string {
+func FormatInt(v int) string {
 	return strconv.FormatInt(int64(v), 10)
 }
 
-func Int8ToString(v int8) string {
+func FormatInt8(v int8) string {
 	return strconv.FormatInt(int64(v), 10)
 }
 
-func Int16ToString(v int16) string {
+func FormatInt16(v int16) string {
 	return strconv.FormatInt(int64(v), 10)
 }
 
-func Int32ToString(v int32) string {
+func FormatInt32(v int32) string {
 	return strconv.FormatInt(int64(v), 10)
 }
 
-func Int64ToString(v int64) string {
+func FormatInt64(v int64) string {
 	return strconv.FormatInt(int64(v), 10)
 }
 
-func UintToString(v uint) string {
+func FormatUint(v uint) string {
 	return strconv.FormatUint(uint64(v), 10)
 }
 
-func Uint8ToString(v uint8) string {
+func FormatUint8(v uint8) string {
 	return strconv.FormatUint(uint64(v), 10)
 }
 
-func Uint16ToString(v uint16) string {
+func FormatUint16(v uint16) string {
 	return strconv.FormatUint(uint64(v), 10)
 }
 
-func Uint32ToString(v uint32) string {
+func FormatUint32(v uint32) string {
 	return strconv.FormatUint(uint64(v), 10)
 }
 
-func Uint64ToString(v uint64) string {
+func FormatUint64(v uint64) string {
 	return strconv.FormatUint(uint64(v), 10)
 }
 
-func IntToSlice(v int) []byte {
+func FormatIntToSlice(v int) []byte {
 	return strconv.AppendInt(nil, int64(v), 10)
 }
 
-func Int8ToSlice(v int8) []byte {
+func FormatInt8ToSlice(v int8) []byte {
 	return strconv.AppendInt(nil, int64(v), 10)
 }
 
-func Int16Slice(v int16) []byte {
+func FormatInt16ToSlice(v int16) []byte {
 	return strconv.AppendInt(nil, int64(v), 10)
 }
 
-func Int32ToSlice(v int32) []byte {
+func FormatInt32ToSlice(v int32) []byte {
 	return strconv.AppendInt(nil, int64(v), 10)
 }
 
-func Int64ToSlice(v int64) []byte {
+func FormatInt64ToSlice(v int64) []byte {
 	return strconv.AppendInt(nil, int64(v), 10)
 }
 
-func UintToSlice(v uint) []byte {
+func FormatUintToSlice(v uint) []byte {
 	return strconv.AppendUint(nil, uint64(v), 10)
 }
 
-func Uint8ToSlice(v uint8) []byte {
+func FormatUint8ToSlice(v uint8) []byte {
 	return strconv.AppendUint(nil, uint64(v), 10)
 }
 
-func Uint16ToSlice(v uint16) []byte {
+func FormatUint16ToSlice(v uint16) []byte {
 	return strconv.AppendUint(nil, uint64(v), 10)
 }
 
-func Uint32ToSlice(v uint32) []byte {
+func FormatUint32ToSlice(v uint32) []byte {
 	return strconv.AppendUint(nil, uint64(v), 10)
 }
 
-func Uint64ToSlice(v uint64) []byte {
+func FormatUint64ToSlice(v uint64) []byte {
 	return strconv.AppendUint(nil, uint64(v), 10)
 }

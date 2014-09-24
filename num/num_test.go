@@ -147,49 +147,49 @@ func TestBytes(t *testing.T) {
 }
 
 func TestStr(t *testing.T) {
-	if v, err := StringToUint64(Uint64ToString(1)); err != nil {
+	if v, err := ParseUint64(FormatUint64(1)); err != nil {
 		t.Fatal(err)
 	} else if v != 1 {
 		t.Fatal(v)
 	}
 
-	if v, err := StringToUint32(Uint32ToString(1)); err != nil {
+	if v, err := ParseUint32(FormatUint32(1)); err != nil {
 		t.Fatal(err)
 	} else if v != 1 {
 		t.Fatal(v)
 	}
 
-	if v, err := StringToUint16(Uint16ToString(1)); err != nil {
+	if v, err := ParseUint16(FormatUint16(1)); err != nil {
 		t.Fatal(err)
 	} else if v != 1 {
 		t.Fatal(v)
 	}
 
-	if v, err := StringToUint8(Uint8ToString(1)); err != nil {
+	if v, err := ParseUint8(FormatUint8(1)); err != nil {
 		t.Fatal(err)
 	} else if v != 1 {
 		t.Fatal(v)
 	}
 
-	if v, err := StringToInt64(Int64ToString(-1)); err != nil {
+	if v, err := ParseInt64(FormatInt64(-1)); err != nil {
 		t.Fatal(err)
 	} else if v != -1 {
 		t.Fatal(v)
 	}
 
-	if v, err := StringToInt32(Int32ToString(-1)); err != nil {
+	if v, err := ParseInt32(FormatInt32(-1)); err != nil {
 		t.Fatal(err)
 	} else if v != -1 {
 		t.Fatal(v)
 	}
 
-	if v, err := StringToInt16(Int16ToString(-1)); err != nil {
+	if v, err := ParseInt16(FormatInt16(-1)); err != nil {
 		t.Fatal(err)
 	} else if v != -1 {
 		t.Fatal(v)
 	}
 
-	if v, err := StringToInt8(Int8ToString(-1)); err != nil {
+	if v, err := ParseInt8(FormatInt8(-1)); err != nil {
 		t.Fatal(err)
 	} else if v != -1 {
 		t.Fatal(v)
