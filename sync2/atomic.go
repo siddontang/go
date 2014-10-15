@@ -64,6 +64,24 @@ func (i *AtomicInt64) CompareAndSwap(oldval, newval int64) (swapped bool) {
 	return atomic.CompareAndSwapInt64((*int64)(i), oldval, newval)
 }
 
+type AtomicUint64 uint64
+
+func (i *AtomicUint64) Add(n uint64) uint64 {
+	return atomic.AddUint64((*uint64)(i), n)
+}
+
+func (i *AtomicUint64) Set(n uint64) {
+	atomic.StoreUint64((*uint64)(i), n)
+}
+
+func (i *AtomicUint64) Get() uint64 {
+	return atomic.LoadUint64((*uint64)(i))
+}
+
+func (i *AtomicUint64) CompareAndSwap(oldval, newval uint64) (swapped bool) {
+	return atomic.CompareAndSwapUint64((*uint64)(i), oldval, newval)
+}
+
 type AtomicDuration int64
 
 func (d *AtomicDuration) Add(duration time.Duration) time.Duration {
