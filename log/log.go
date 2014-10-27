@@ -43,6 +43,10 @@ type Logger struct {
 	msg  chan []byte
 
 	bufs [][]byte
+
+	wg sync.WaitGroup
+
+	closed bool
 }
 
 //new a logger with specified handler and flag
@@ -55,11 +59,13 @@ func New(handler Handler, flag int) *Logger {
 	l.flag = flag
 
 	l.quit = make(chan struct{})
+	l.closed = false
 
 	l.msg = make(chan []byte, 1024)
 
 	l.bufs = make([][]byte, 0, 16)
 
+	l.wg.Add(1)
 	go l.run()
 
 	return l
@@ -78,13 +84,17 @@ func newStdHandler() *StreamHandler {
 var std = NewDefault(newStdHandler())
 
 func (l *Logger) run() {
+	defer l.wg.Done()
 	for {
 		select {
 		case msg := <-l.msg:
 			l.handler.Write(msg)
 			l.putBuf(msg)
 		case <-l.quit:
-			l.handler.Close()
+			//we must log all msg
+			if len(l.msg) == 0 {
+				return
+			}
 		}
 	}
 }
@@ -113,12 +123,18 @@ func (l *Logger) putBuf(buf []byte) {
 }
 
 func (l *Logger) Close() {
-	if l.quit == nil {
+	if l.closed {
 		return
 	}
+	l.closed = true
 
 	close(l.quit)
+
+	l.wg.Wait()
+
 	l.quit = nil
+
+	l.handler.Close()
 }
 
 //set log level, any log level less than it will not log
@@ -129,6 +145,11 @@ func (l *Logger) SetLevel(level int) {
 //a low interface, maybe you can use it for your special log format
 //but it may be not exported later......
 func (l *Logger) Output(callDepth int, level int, format string, v ...interface{}) {
+	if l.closed {
+		//closed
+		return
+	}
+
 	if l.level > level {
 		return
 	}

@@ -12,6 +12,8 @@ func TestStdStreamLog(t *testing.T) {
 
 	s.Close()
 
+	s.Info("can not log")
+
 	Info("hello world")
 }
 
