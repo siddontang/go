@@ -142,5 +142,5 @@ func (b *AtomicBool) Set(v bool) {
 }
 
 func (b *AtomicBool) Get() bool {
-	return atomic.LoadInt32((*int32)(i)) == 1
+	return atomic.LoadInt32((*int32)(b)) == 1
 }
