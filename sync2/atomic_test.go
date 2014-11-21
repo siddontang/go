@@ -29,4 +29,21 @@ func TestAtomicString(t *testing.T) {
 	if s.Get() != "c" {
 		t.Errorf("want c, got %s", s.Get())
 	}
+
+	var b AtomicBool
+	if b.Get() != false {
+		t.Fatal("must false")
+	}
+
+	b.Set(true)
+
+	if b.Get() != true {
+		t.Fatal("must true")
+	}
+
+	b.Set(false)
+
+	if b.Get() != false {
+		t.Fatal("must false")
+	}
 }
