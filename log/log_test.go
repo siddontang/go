@@ -15,6 +15,8 @@ func TestStdStreamLog(t *testing.T) {
 	s.Info("can not log")
 
 	Info("hello world")
+
+	Infof("%s %d", "Hello", 123)
 }
 
 func TestRotatingFileLog(t *testing.T) {
