@@ -16,5 +16,6 @@
 //  h := NewStreamHandler(os.Stdout)
 //  l := log.NewDefault(h)
 //  l.Info("hello world")
+//  l.Infof("%s %d", "hello", 123)
 //
 package log
