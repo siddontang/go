@@ -6,7 +6,7 @@
 //
 // Use
 //
-//  import "github.com/siddontang/go-log/log"
+//  import "github.com/siddontang/go/log"
 //
 //  //log with different level
 //  log.Info("hello world")
