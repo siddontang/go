@@ -1,12 +1,13 @@
 package websocket
 
 import (
-	"github.com/gorilla/websocket"
 	"net"
 	"net/http"
 	"net/url"
 	"testing"
 	"time"
+
+	"github.com/gorilla/websocket"
 )
 
 func TestWSClient(t *testing.T) {

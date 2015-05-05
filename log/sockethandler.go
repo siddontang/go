@@ -7,8 +7,8 @@ import (
 )
 
 //SocketHandler writes log to a connectionl.
-//Network protocol is simple: log length + log | log length + log. log length is uint32, bigendian. 
-//you must implement your own log server, maybe you can use logd instead simply. 
+//Network protocol is simple: log length + log | log length + log. log length is uint32, bigendian.
+//you must implement your own log server, maybe you can use logd instead simply.
 type SocketHandler struct {
 	c        net.Conn
 	protocol string
