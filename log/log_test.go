@@ -23,6 +23,11 @@ func TestStdStreamLog(t *testing.T) {
 	SetLevel(LevelError)
 
 	Infof("%s %d", "Hello", 123)
+
+	SetLevelByName("info")
+
+	Infof("%s %d", "Hello", 123)
+
 	Fatalf("%s %d", "Hello", 123)
 }
 

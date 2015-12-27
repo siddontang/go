@@ -5,6 +5,7 @@ import (
 	"os"
 	"runtime"
 	"strconv"
+	"strings"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -155,6 +156,25 @@ func (l *Logger) SetLevel(level int) {
 	l.level.Set(level)
 }
 
+// name can be in ["trace", "debug", "info", "warn", "error", "fatal"]
+func (l *Logger) SetLevelByName(name string) {
+	name = strings.ToLower(name)
+	switch name {
+	case "trace":
+		l.SetLevel(LevelTrace)
+	case "debug":
+		l.SetLevel(LevelDebug)
+	case "info":
+		l.SetLevel(LevelInfo)
+	case "warn":
+		l.SetLevel(LevelWarn)
+	case "error":
+		l.SetLevel(LevelError)
+	case "fatal":
+		l.SetLevel(LevelFatal)
+	}
+}
+
 func (l *Logger) SetHandler(h Handler) {
 	if l.closed.Get() == 1 {
 		return
@@ -286,6 +306,11 @@ func (l *Logger) Fatalf(format string, v ...interface{}) {
 
 func SetLevel(level int) {
 	std.SetLevel(level)
+}
+
+// name can be in ["trace", "debug", "info", "warn", "error", "fatal"]
+func SetLevelByName(name string) {
+	std.SetLevelByName(name)
 }
 
 func SetHandler(h Handler) {
