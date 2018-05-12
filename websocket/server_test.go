@@ -63,7 +63,7 @@ func TestWSServer(t *testing.T) {
 	if err != nil {
 		t.Fatal(err.Error())
 	}
-	ws, _, err := websocket.NewClient(conn, &url.URL{Host: "127.0.0.1:65500", Path: "/test/server"}, nil, 1024, 1024)
+	ws, _, err := websocket.NewClient(conn, &url.URL{Scheme: "ws", Host: "127.0.0.1:65500", Path: "/test/server"}, nil, 1024, 1024)
 
 	ws.SetPongHandler(func(string) error {
 		println("pong")
