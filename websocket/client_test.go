@@ -1,8 +1,6 @@
 package websocket
 
 import (
-	"fmt"
-	"log"
 	"net"
 	"net/http"
 	"net/url"
@@ -19,7 +17,7 @@ func TestWSClient(t *testing.T) {
 
 	http.HandleFunc("/test/client", func(w http.ResponseWriter, r *http.Request) {
 		defer func() {
-			fmt.Println("wg.Done")
+			t.Log("server: wg.Done")
 			wg.Done()
 		}()
 
@@ -27,10 +25,10 @@ func TestWSClient(t *testing.T) {
 		if err != nil {
 			t.Fatal(err.Error())
 		}
-		log.Println("websocket.Upgrade")
+		t.Log("websocket.Upgrade")
 
 		conn.SetPingHandler(func(d string) error {
-			fmt.Println("receive from client: ", d)
+			t.Log("receive from client: ", d)
 			conn.WriteMessage(websocket.PongMessage, []byte("server.Pong"))
 			return nil
 		})
@@ -43,33 +41,26 @@ func TestWSClient(t *testing.T) {
 			t.Fatal("invalid msg type", msgType)
 		}
 
-		log.Println("server conn.ReadMessage")
-
 		err = conn.WriteMessage(websocket.TextMessage, msg)
 		if err != nil {
 			t.Fatal(err.Error())
 		}
-		log.Println("server conn.WriteMessage")
 
-		log.Println("server conn.ReadMessage")
 		msgType, msg, err = conn.ReadMessage()
-		log.Println("server conn.ReadMessage")
 		if err != nil {
-			log.Println(err)
 			t.Fatal(err.Error())
 		}
 		if msgType != websocket.TextMessage {
 			t.Fatal("invalid msg type", msgType)
 		}
-		log.Println("server conn.ReadMessage")
 		conn.WriteMessage(websocket.PongMessage, []byte("server.Pong"))
 	})
 
-	go http.ListenAndServe(":65501", nil)
+	go http.ListenAndServe(":65500", nil)
 
 	time.Sleep(time.Second * 1)
 
-	conn, err := net.Dial("tcp", "127.0.0.1:65501")
+	conn, err := net.Dial("tcp", "127.0.0.1:65500")
 
 	if err != nil {
 		t.Fatal(err.Error())
@@ -87,7 +78,7 @@ func TestWSClient(t *testing.T) {
 
 	err = ws.WriteString(payload)
 	if err != nil {
-		fmt.Println(err)
+		t.Fatal(err.Error())
 	}
 
 	msgType, msg, err := ws.ReadMessage()
@@ -105,12 +96,10 @@ func TestWSClient(t *testing.T) {
 	//test ping
 	err = ws.Ping([]byte("client.Ping"))
 	if err != nil {
-		fmt.Println(err)
+		t.Fatal(err.Error())
 	}
 
-	fmt.Println("ws.ReadMessage: PongMessage")
 	msgType, msg, err = ws.ReadMessage()
-	fmt.Println("ws.ReadMessage: PongMessage")
 	if err != nil {
 		t.Fatal(err.Error())
 	}
@@ -118,11 +107,8 @@ func TestWSClient(t *testing.T) {
 		t.Fatal("invalid msg type", msgType)
 	}
 
-	fmt.Println(string(msg))
-
 	ws.WriteMessage(websocket.TextMessage, []byte("done"))
 
 	// ws.Close()
 	wg.Wait()
-	log.Println("end")
 }
