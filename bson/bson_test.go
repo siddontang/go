@@ -581,7 +581,7 @@ var marshalErrorItems = []testItemType{
 	{&structWithDupKeys{},
 		"Duplicated key 'name' in struct bson_test.structWithDupKeys"},
 	{bson.Raw{0x0A, []byte{}},
-		"Attempted to unmarshal Raw kind 10 as a document"},
+		"Attempted to marshal Raw kind 10 as a document"},
 	{&inlineCantPtr{&struct{ A, B int }{1, 2}},
 		"Option ,inline needs a struct value or map field"},
 	{&inlineDupName{1, struct{ A, B int }{2, 3}},
@@ -1429,9 +1429,9 @@ func (s *S) TestObjectIdJSONUnmarshaling(c *C) {
 func (s *S) TestObjectIdJSONUnmarshalingError(c *C) {
 	v := jsonType{}
 	err := json.Unmarshal([]byte(`{"Id":"4d88e15b60f486e428412dc9A"}`), &v)
-	c.Assert(err, ErrorMatches, `Invalid ObjectId in JSON: "4d88e15b60f486e428412dc9A"`)
+	c.Assert(err, ErrorMatches, `invalid ObjectId in JSON: "4d88e15b60f486e428412dc9A"`)
 	err = json.Unmarshal([]byte(`{"Id":"4d88e15b60f486e428412dcZ"}`), &v)
-	c.Assert(err, ErrorMatches, `Invalid ObjectId in JSON: "4d88e15b60f486e428412dcZ" .*`)
+	c.Assert(err, ErrorMatches, `invalid ObjectId in JSON: "4d88e15b60f486e428412dcZ" .*`)
 }
 
 // --------------------------------------------------------------------------
