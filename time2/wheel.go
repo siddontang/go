@@ -1,6 +1,7 @@
 package time2
 
 import (
+	"container/list"
 	"sync"
 	"time"
 )
@@ -8,15 +9,11 @@ import (
 const (
 	tvn_bits uint64 = 6
 	tvr_bits uint64 = 8
-	tvn_size uint64 = 64  //1 << tvn_bits
-	tvr_size uint64 = 256 //1 << tvr_bits
+	tvn_size uint64 = 64  // 1 << tvn_bits
+	tvr_size uint64 = 256 // 1 << tvr_bits
 
-	tvn_mask uint64 = 63  //tvn_size - 1
-	tvr_mask uint64 = 255 //tvr_size -1
-)
-
-const (
-	defaultTimerSize = 128
+	tvn_mask uint64 = 63  // tvn_size - 1
+	tvr_mask uint64 = 255 // tvr_size -1
 )
 
 type timer struct {
@@ -28,8 +25,8 @@ type timer struct {
 
 	w *Wheel
 
-	vec   []*timer
-	index int
+	vec *list.List
+	e   *list.Element
 }
 
 type Wheel struct {
@@ -37,11 +34,11 @@ type Wheel struct {
 
 	jiffies uint64
 
-	tv1 [][]*timer
-	tv2 [][]*timer
-	tv3 [][]*timer
-	tv4 [][]*timer
-	tv5 [][]*timer
+	tv1 []*list.List
+	tv2 []*list.List
+	tv3 []*list.List
+	tv4 []*list.List
+	tv5 []*list.List
 
 	tick time.Duration
 
@@ -54,10 +51,10 @@ func NewWheel(tick time.Duration) *Wheel {
 
 	w.quit = make(chan struct{})
 
-	f := func(size int) [][]*timer {
-		tv := make([][]*timer, size)
+	f := func(size int) []*list.List {
+		tv := make([]*list.List, size)
 		for i := range tv {
-			tv[i] = make([]*timer, 0, defaultTimerSize)
+			tv[i] = list.New()
 		}
 
 		return tv
@@ -80,7 +77,7 @@ func (w *Wheel) addTimerInternal(t *timer) {
 	expires := t.expires
 	idx := t.expires - w.jiffies
 
-	var tv [][]*timer
+	var tv []*list.List
 	var i uint64
 
 	if idx < tvr_size {
@@ -109,18 +106,16 @@ func (w *Wheel) addTimerInternal(t *timer) {
 		tv = w.tv5
 	}
 
-	tv[i] = append(tv[i], t)
-
+	t.e = tv[i].PushBack(t)
 	t.vec = tv[i]
-	t.index = len(tv[i]) - 1
 }
 
-func (w *Wheel) cascade(tv [][]*timer, index int) int {
+func (w *Wheel) cascade(tv []*list.List, index int) int {
 	vec := tv[index]
-	tv[index] = vec[0:0:defaultTimerSize]
+	tv[index] = list.New()
 
-	for _, t := range vec {
-		w.addTimerInternal(t)
+	for e := vec.Front(); e != nil; e = e.Next() {
+		w.addTimerInternal(e.Value.(*timer))
 	}
 
 	return index
@@ -145,17 +140,14 @@ func (w *Wheel) onTick() {
 	w.jiffies++
 
 	vec := w.tv1[index]
-	w.tv1[index] = vec[0:0:defaultTimerSize]
+	w.tv1[index] = list.New()
 
 	w.Unlock()
 
-	f := func(vec []*timer) {
+	f := func(vec *list.List) {
 		now := time.Now()
-		for _, t := range vec {
-			if t == nil {
-				continue
-			}
-
+		for e := vec.Front(); e != nil; e = e.Next() {
+			t := e.Value.(*timer)
 			t.f(now, t.arg)
 
 			if t.period > 0 {
@@ -165,7 +157,7 @@ func (w *Wheel) onTick() {
 		}
 	}
 
-	if len(vec) > 0 {
+	if vec.Len() > 0 {
 		go f(vec)
 	}
 }
@@ -178,11 +170,9 @@ func (w *Wheel) addTimer(t *timer) {
 
 func (w *Wheel) delTimer(t *timer) {
 	w.Lock()
-	vec := t.vec
-	index := t.index
 
-	if len(vec) > index && vec[index] == t {
-		vec[index] = nil
+	if t.vec.Remove(t.e) != t {
+		panic("internal error")
 	}
 
 	w.Unlock()
