@@ -45,12 +45,13 @@ type RotatingFileHandler struct {
 
 	fileName    string
 	maxBytes    int
+	curBytes    int
 	backupCount int
 }
 
 func NewRotatingFileHandler(fileName string, maxBytes int, backupCount int) (*RotatingFileHandler, error) {
 	dir := path.Dir(fileName)
-	os.Mkdir(dir, 0777)
+	os.MkdirAll(dir, 0777)
 
 	h := new(RotatingFileHandler)
 
@@ -68,12 +69,20 @@ func NewRotatingFileHandler(fileName string, maxBytes int, backupCount int) (*Ro
 		return nil, err
 	}
 
+	f, err := h.fd.Stat()
+	if err != nil {
+		return nil, err
+	}
+	h.curBytes = int(f.Size())
+
 	return h, nil
 }
 
 func (h *RotatingFileHandler) Write(p []byte) (n int, err error) {
 	h.doRollover()
-	return h.fd.Write(p)
+	n, err = h.fd.Write(p)
+	h.curBytes += n
+	return
 }
 
 func (h *RotatingFileHandler) Close() error {
@@ -84,6 +93,11 @@ func (h *RotatingFileHandler) Close() error {
 }
 
 func (h *RotatingFileHandler) doRollover() {
+
+	if h.curBytes < h.maxBytes  {
+		return
+	}
+
 	f, err := h.fd.Stat()
 	if err != nil {
 		return
@@ -92,6 +106,7 @@ func (h *RotatingFileHandler) doRollover() {
 	if h.maxBytes <= 0 {
 		return
 	} else if f.Size() < int64(h.maxBytes) {
+		h.curBytes = int(f.Size())
 		return
 	}
 
@@ -109,6 +124,12 @@ func (h *RotatingFileHandler) doRollover() {
 		os.Rename(h.fileName, dfn)
 
 		h.fd, _ = os.OpenFile(h.fileName, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+		h.curBytes = 0
+		f, err := h.fd.Stat()
+		if err != nil {
+			return
+		}
+		h.curBytes = int(f.Size())
 	}
 }
 
