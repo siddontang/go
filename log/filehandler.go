@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path"
+	"sync"
 	"time"
 )
 
@@ -47,6 +48,7 @@ type RotatingFileHandler struct {
 	maxBytes    int
 	curBytes    int
 	backupCount int
+	rollLock    sync.Mutex
 }
 
 func NewRotatingFileHandler(fileName string, maxBytes int, backupCount int) (*RotatingFileHandler, error) {
@@ -94,7 +96,7 @@ func (h *RotatingFileHandler) Close() error {
 
 func (h *RotatingFileHandler) doRollover() {
 
-	if h.curBytes < h.maxBytes  {
+	if h.curBytes < h.maxBytes {
 		return
 	}
 
@@ -111,6 +113,13 @@ func (h *RotatingFileHandler) doRollover() {
 	}
 
 	if h.backupCount > 0 {
+
+		h.rollLock.Lock()
+		defer h.rollLock.Unlock()
+		if h.curBytes < h.maxBytes {
+			return
+		}
+
 		h.fd.Close()
 
 		for i := h.backupCount - 1; i > 0; i-- {
@@ -145,6 +154,7 @@ type TimeRotatingFileHandler struct {
 	interval   int64
 	suffix     string
 	rolloverAt int64
+	rollLock   sync.Mutex
 }
 
 const (
@@ -198,6 +208,13 @@ func (h *TimeRotatingFileHandler) doRollover() {
 	now := time.Now()
 
 	if h.rolloverAt <= now.Unix() {
+
+		h.rollLock.Lock()
+		defer h.rollLock.Unlock()
+		if h.rolloverAt > time.Now().Unix() {
+			return
+		}
+
 		fName := h.baseName + now.Format(h.suffix)
 		h.fd.Close()
 		e := os.Rename(h.baseName, fName)
