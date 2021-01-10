@@ -57,7 +57,7 @@ func checkListPointers(t *testing.T, l *List, es []*Element) {
 			Prev = prev
 		}
 		if p := e.prev; p != prev.index {
-			t.Errorf("elt[%d](%p).prev = %p, want %p", i, e, p, prev)
+			t.Errorf("elt[%d](%p).prev = %d, want %p", i, e, p, prev)
 		}
 		if p := e.Prev(); p != Prev {
 			t.Errorf("elt[%d](%p).Prev() = %p, want %p", i, e, p, Prev)
@@ -70,7 +70,7 @@ func checkListPointers(t *testing.T, l *List, es []*Element) {
 			Next = next
 		}
 		if n := e.next; n != next.index {
-			t.Errorf("elt[%d](%p).next = %p, want %p", i, e, n, next)
+			t.Errorf("elt[%d](%p).next = %d, want %p", i, e, n, next)
 		}
 		if n := e.Next(); n != Next {
 			t.Errorf("elt[%d](%p).Next() = %p, want %p", i, e, n, Next)
