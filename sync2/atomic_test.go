@@ -48,4 +48,15 @@ func TestAtomicBool(t *testing.T) {
 	if b.Get() != false {
 		t.Fatal("must false")
 	}
+
+	if b.CompareAndSwap(true, false) {
+		t.Errorf("want false, got true")
+	}
+	if !b.CompareAndSwap(false, true) {
+		t.Errorf("want true, got false")
+	}
+
+	if b.Get() != true {
+		t.Fatal("must true")
+	}
 }

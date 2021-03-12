@@ -144,3 +144,16 @@ func (b *AtomicBool) Set(v bool) {
 func (b *AtomicBool) Get() bool {
 	return atomic.LoadInt32((*int32)(b)) == 1
 }
+
+func (d *AtomicBool) CompareAndSwap(oldval, newval bool) (swapped bool) {
+	conv := func(v bool) int32 {
+		if v {
+			return 1
+		}
+		return 0
+	}
+	oldI := conv(oldval)
+	newI := conv(newval)
+
+	return atomic.CompareAndSwapInt32((*int32)(d), oldI, newI)
+}
