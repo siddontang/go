@@ -209,7 +209,7 @@ func (l *Logger) Output(callDepth int, level int, format string, v ...interface{
 
 	buf = append(buf, s...)
 
-	if s[len(s)-1] != '\n' {
+	if len(s) == 0 || s[len(s)-1] != '\n' {
 		buf = append(buf, '\n')
 	}
 
